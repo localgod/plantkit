@@ -1,0 +1,29 @@
+{
+  "typeScriptVersion": "5.8.3",
+  "compilerOptions": {
+    "strict": true,
+    "target": "es2024",
+    "module": "nodenext",
+    "lib": [
+      "ES2024",
+      "DOM"
+    ],
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ],
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "./**/*"
+  ]
+}
