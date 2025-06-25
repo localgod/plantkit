@@ -11,15 +11,6 @@ tasks:
   - name: Install Dependencies
     init: |
       npm install
-      cd slides && npm install
-
-  - name: Start Docker Service
-    command: "docker run -d -p 8080:8080 -e PLANTUML_LIMIT_SIZE=15000 plantuml/plantuml-server:jetty-v1.2023.1"
-    openMode: tab-after
-
-  - name: Start Slides Service
-    command: cd slides && npm run dev
-    openMode: tab-after
 
   - name: Start Typescript Service
     command: npm run dev

@@ -1,4 +1,5 @@
-node_modules
-dist
+/coverage
+/node_modules
+/dist
 /C4*.puml
 /Archimate.puml
