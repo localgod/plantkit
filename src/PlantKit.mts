@@ -1,5 +1,7 @@
-import { Node } from './Node.mjs';
+import { PlanNode } from './PlanNode.mjs';
 import { Element } from './Element.mjs';
+import { Relation } from './Relation.mjs';
+import { NodeGraph } from './NodeGraph.mjs';
 class PlantKit {
     constructor() { }
 
@@ -13,7 +15,7 @@ class PlantKit {
         return `ID_${transformed}`;
     }
 
-    public printNode(node: Node, indent = 0): void {
+    public printNode(node: PlanNode, indent = 0): void {
         const children = node.getChildren();
         if (children.length > 0) {
             console.log('  '.repeat(indent) + node.getName() + ' {');
@@ -26,11 +28,29 @@ class PlantKit {
         }
     }
 
-    public printArchimate(node: Node, indent = 0): void {
+    public printRelations(nodeGraph: NodeGraph, indent = 0): void {
+        const relations = nodeGraph.getRelations();
+        if (relations.length > 0) {
+            for (const relation of relations) {
+                console.log('  '.repeat(indent + 1) + `${relation.source.getName()} -> ${relation.target.getName()} (${relation.type})`);
+            }
+            console.log('  '.repeat(indent) + '}');
+        }
+    }
+
+    public printArchimate(node: PlanNode, indent = 0): void {
         const children = node.getChildren();
-        const type = node.getProperties()['type'].toString();
         const name = PlantKit.toValidElementName(node.getName());
-        const label = node.getProperties()['label'].toString();
+        const properties = node.getProperties();
+        let type = "";
+        if (Object.prototype.hasOwnProperty.call(properties, "type")) {
+            type = properties['type'].toString();
+        }
+        let label: string = "";
+        if (Object.prototype.hasOwnProperty.call(properties, "label")) {
+            label = properties['label'].toString();
+        }
+
         if (children.length > 0) {
             console.log('  '.repeat(indent) + Element(type, name, label) + ' {');
             for (const child of node.getChildren()) {
@@ -39,6 +59,19 @@ class PlantKit {
             console.log('  '.repeat(indent) + '}');
         } else {
             console.log('  '.repeat(indent) + Element(type, name, label));
+        }
+    }
+
+    public printArchimateRelations(nodeGraph: NodeGraph, indent = 0): void {
+        const relations = nodeGraph.getRelations();
+        if (relations.length > 0) {
+            for (const relation of relations) {
+                const type = relation.type.toString();
+                const source = PlantKit.toValidElementName(relation.source.getName());
+                const target = PlantKit.toValidElementName(relation.target.getName());
+                const label = relation.properties ? relation.properties['label'].toString() : '';
+                console.log('  '.repeat(indent + 1) + Relation(type, source, target, label));
+            }
         }
     }
 }
