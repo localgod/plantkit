@@ -1,6 +1,6 @@
-import { PlanNode } from './PlanNode.mjs';
-import { Element } from './Element.mjs';
-import { Relation } from './Relation.mjs';
+import { PlantNode } from './PlantNode.mjs';
+import { Element } from './archimate/Element.mjs';
+import { Relation } from './archimate/Relation.mjs';
 import { NodeGraph } from './NodeGraph.mjs';
 class PlantKit {
     constructor() { }
@@ -15,7 +15,7 @@ class PlantKit {
         return `ID_${transformed}`;
     }
 
-    public printNode(node: PlanNode, indent = 0): void {
+    public printNode(node: PlantNode, indent = 0): void {
         const children = node.getChildren();
         if (children.length > 0) {
             console.log('  '.repeat(indent) + node.getName() + ' {');
@@ -38,7 +38,7 @@ class PlantKit {
         }
     }
 
-    public printArchimate(node: PlanNode, indent = 0): void {
+    public printArchimate(node: PlantNode, indent = 0): void {
         const children = node.getChildren();
         const name = PlantKit.toValidElementName(node.getName());
         const properties = node.getProperties();

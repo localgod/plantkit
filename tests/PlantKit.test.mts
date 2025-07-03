@@ -1,10 +1,9 @@
-// PlantKit.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { PlantKit } from '../src/PlantKit.mjs';
-import { PlanNode } from '../src/PlanNode.mjs';
-import { Element } from '../src/Element.mjs';
+import { PlantNode } from '../src/PlantNode.mjs';
+import { Element } from '../src/archimate/Element.mjs';
 import { NodeGraph } from '../src/NodeGraph.mjs';
-import { Relation } from '../src/Relation.mjs';
+import { Relation } from '../src/archimate/Relation.mjs';
 
 describe('PlantKit', () => {
   let plantKit: PlantKit;
@@ -24,12 +23,13 @@ describe('PlantKit', () => {
     expect(plantKit).toBeInstanceOf(PlantKit);
   });
 
+
   describe('printNode', () => {
     it('prints hierarchical node tree correctly', () => {
-      const root = new PlanNode('Root');
-      const child1 = new PlanNode('Child 1');
-      const child2 = new PlanNode('Child 2');
-      const grandchild = new PlanNode('Grandchild');
+      const root = new PlantNode('Root');
+      const child1 = new PlantNode('Child 1');
+      const child2 = new PlantNode('Child 2');
+      const grandchild = new PlantNode('Grandchild');
 
       root.addChild(child1);
       root.addChild(child2);
@@ -49,36 +49,36 @@ describe('PlantKit', () => {
 
   describe('Archimate printing', () => {
     let nodeGraph: NodeGraph;
-    let root: PlanNode;
-    let child1: PlanNode;
-    let child2: PlanNode;
-    let grandchild: PlanNode;
-    let deepChild: PlanNode;
+    let root: PlantNode;
+    let child1: PlantNode;
+    let child2: PlantNode;
+    let grandchild: PlantNode;
+    let deepChild: PlantNode;
 
     beforeEach(() => {
       nodeGraph = new NodeGraph();
 
-      root = new PlanNode('Root', {
+      root = new PlantNode('Root', {
         type: Element.type.Application_Collaboration,
         label: '<b>Root</b>',
       });
 
-      child1 = new PlanNode('Child 1', {
+      child1 = new PlantNode('Child 1', {
         type: Element.type.Application_Component,
         label: '<b>Child 1</b>',
       });
 
-      child2 = new PlanNode('Child 2', {
+      child2 = new PlantNode('Child 2', {
         type: Element.type.Application_Interface,
         label: '<b>Child 2</b>',
       });
 
-      grandchild = new PlanNode('Grandchild', {
+      grandchild = new PlantNode('Grandchild', {
         type: Element.type.Motivation_Constraint,
         label: '<b>Grandchild</b>',
       });
 
-      deepChild = new PlanNode('jonny', {
+      deepChild = new PlantNode('jonny', {
         type: Element.type.Motivation_Constraint,
         label: '<b>Grandchild</b>',
       });
@@ -123,8 +123,50 @@ describe('PlantKit', () => {
 
   describe('Edge cases', () => {
     it('handles nodes without label or type gracefully', () => {
-      const root = new PlanNode('EmptyNode');
+      const root = new PlantNode('EmptyNode');
       expect(() => plantKit.printArchimate(root)).not.toThrow();
     });
+  });
+});
+
+it('should create a new PlantKit instance', () => {
+  const plantKit = new PlantKit();
+  expect(plantKit).toBeInstanceOf(PlantKit);
+});
+
+describe('printNode', () => {
+  let plantKit: PlantKit;
+  let node: PlantNode;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    plantKit = new PlantKit();
+    node = new PlantNode('Test Node');
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+  });
+
+  it('should print a node with no children', () => {
+
+    plantKit.printNode(node);
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    expect(consoleSpy).toHaveBeenCalledWith('Test Node');
+  });
+
+  it('should print a node with children', () => {
+    const child1 = new PlantNode('Child Node 1');
+    const child2 = new PlantNode('Child Node 2');
+    node.addChild(child1);
+    node.addChild(child2);
+
+
+    plantKit.printNode(node);
+    expect(consoleSpy).toHaveBeenCalledTimes(4);
+    expect(consoleSpy).toHaveBeenNthCalledWith(1, 'Test Node {');
+    expect(consoleSpy).toHaveBeenNthCalledWith(2, '  Child Node 1');
+    expect(consoleSpy).toHaveBeenNthCalledWith(3, '  Child Node 2');
   });
 });

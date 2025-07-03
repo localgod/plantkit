@@ -1,7 +1,7 @@
-export class PlanNode {
+export class PlantNode {
   private name: string;
   private properties: { [key: string]: string|number };
-  private children: PlanNode[];
+  private children: PlantNode[];
 
   constructor(name: string, properties?: { [key: string]: string|number }) {
     this.name = name;
@@ -9,7 +9,7 @@ export class PlanNode {
     this.children = [];
   }
 
-  public addChild(node: PlanNode): void {
+  public addChild(node: PlantNode): void {
     this.children.push(node);
   }
 
@@ -21,11 +21,11 @@ export class PlanNode {
     return this.properties;
   }
 
-  public getChildren(): PlanNode[] {
+  public getChildren(): PlantNode[] {
     return this.children;
   }
 
-  public findNode(name: string): PlanNode | null {
+  public findNode(name: string): PlantNode | null {
     if (this.name === name) {
       return this;
     }
