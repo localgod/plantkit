@@ -21,7 +21,10 @@
     "noImplicitAny": true,
     "strictFunctionTypes": true,
     "strictPropertyInitialization": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowImportingTsExtensions": true,
+    "emitDeclarationOnly": true,
+    "declaration": true
   },
   "include": [
     "./**/*"
