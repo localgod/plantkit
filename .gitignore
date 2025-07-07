@@ -3,3 +3,5 @@
 /dist
 /C4*.puml
 /Archimate.puml
+/*.jar
+/diagram.puml

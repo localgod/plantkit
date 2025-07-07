@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { Diagram, Sprite } from '../src/Diagram.mts';
+import { Diagram, Sprite } from '../src/Diagram.mjs';
 
 describe('Diagram', () => {
     let diagram: Diagram;

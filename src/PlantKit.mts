@@ -1,7 +1,7 @@
-import { PlantNode } from './PlantNode.mjs';
-import { Element } from './archimate/Element.mjs';
+import { Element } from './Element.mjs';
+import { Element as ArchimateElement } from './archimate/Element.mjs';
 import { Relation } from './archimate/Relation.mjs';
-import { NodeGraph } from './NodeGraph.mjs';
+import { ElementGraph } from './ElementGraph.mjs';
 class PlantKit {
     constructor() { }
 
@@ -15,7 +15,7 @@ class PlantKit {
         return `ID_${transformed}`;
     }
 
-    public printNode(node: PlantNode, indent = 0): void {
+    public printNode(node: Element, indent = 0): void {
         const children = node.getChildren();
         if (children.length > 0) {
             console.log('  '.repeat(indent) + node.getName() + ' {');
@@ -28,7 +28,7 @@ class PlantKit {
         }
     }
 
-    public printRelations(nodeGraph: NodeGraph, indent = 0): void {
+    public printRelations(nodeGraph: ElementGraph, indent = 0): void {
         const relations = nodeGraph.getRelations();
         if (relations.length > 0) {
             for (const relation of relations) {
@@ -38,7 +38,7 @@ class PlantKit {
         }
     }
 
-    public printArchimate(node: PlantNode, indent = 0): void {
+    public printArchimate(node: Element, indent = 0): void {
         const children = node.getChildren();
         const name = PlantKit.toValidElementName(node.getName());
         const properties = node.getProperties();
@@ -52,18 +52,43 @@ class PlantKit {
         }
 
         if (children.length > 0) {
-            console.log('  '.repeat(indent) + Element(type, name, label) + ' {');
+            console.log('  '.repeat(indent) + ArchimateElement(type, name, label) + ' {');
             for (const child of node.getChildren()) {
                 this.printArchimate(child, indent + 1);
             }
             console.log('  '.repeat(indent) + '}');
         } else {
-            console.log('  '.repeat(indent) + Element(type, name, label));
+            console.log('  '.repeat(indent) + ArchimateElement(type, name, label));
         }
     }
 
-    public printArchimateRelations(nodeGraph: NodeGraph, indent = 0): void {
-        const relations = nodeGraph.getRelations();
+    public toArchimate(node: Element, out: string[] = [], indent = 0): string {
+        const children = node.getChildren();
+        const name = PlantKit.toValidElementName(node.getName());
+        const properties = node.getProperties();
+        let type = "";
+        if (Object.prototype.hasOwnProperty.call(properties, "type")) {
+            type = properties['type'].toString();
+        }
+        let label: string = "";
+        if (Object.prototype.hasOwnProperty.call(properties, "label")) {
+            label = properties['label'].toString();
+        }
+
+        if (children.length > 0) {
+            out.push('  '.repeat(indent) + ArchimateElement(type, name, label) + ' {');
+            for (const child of node.getChildren()) {
+                this.toArchimate(child, out ,indent + 1);
+            }
+            out.push('  '.repeat(indent) + '}')
+        } else {
+            out.push('  '.repeat(indent) + ArchimateElement(type, name, label));
+        }
+        return out.join('\n');
+    }
+
+    public printArchimateRelations(elementGraph: ElementGraph, indent = 0): void {
+        const relations = elementGraph.getRelations();
         if (relations.length > 0) {
             for (const relation of relations) {
                 const type = relation.type.toString();
@@ -73,6 +98,21 @@ class PlantKit {
                 console.log('  '.repeat(indent + 1) + Relation(type, source, target, label));
             }
         }
+    }
+
+        public toArchimateRelations(elementGraph: ElementGraph, indent = 0): string {
+        const out: string[] = [];
+        const relations = elementGraph.getRelations();
+        if (relations.length > 0) {
+            for (const relation of relations) {
+                const type = relation.type.toString();
+                const source = PlantKit.toValidElementName(relation.source.getName());
+                const target = PlantKit.toValidElementName(relation.target.getName());
+                const label = relation.properties ? relation.properties['label'].toString() : '';
+                out.push(' '.repeat(indent + 1) + Relation(type, source, target, label));
+            }
+        }
+        return out.join('\n');
     }
 }
 

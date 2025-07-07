@@ -1,8 +1,8 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { PlantKit } from '../src/PlantKit.mjs';
-import { PlantNode } from '../src/PlantNode.mjs';
-import { Element } from '../src/archimate/Element.mjs';
-import { NodeGraph } from '../src/NodeGraph.mjs';
+import { Element } from '../src/Element.mjs';
+import { Element as ArchimateElement } from '../src/archimate/Element.mjs';
+import { ElementGraph } from '../src/ElementGraph.mjs';
 import { Relation } from '../src/archimate/Relation.mjs';
 
 describe('PlantKit', () => {
@@ -26,10 +26,10 @@ describe('PlantKit', () => {
 
   describe('printNode', () => {
     it('prints hierarchical node tree correctly', () => {
-      const root = new PlantNode('Root');
-      const child1 = new PlantNode('Child 1');
-      const child2 = new PlantNode('Child 2');
-      const grandchild = new PlantNode('Grandchild');
+      const root = new Element('Root');
+      const child1 = new Element('Child 1');
+      const child2 = new Element('Child 2');
+      const grandchild = new Element('Grandchild');
 
       root.addChild(child1);
       root.addChild(child2);
@@ -48,38 +48,38 @@ describe('PlantKit', () => {
   });
 
   describe('Archimate printing', () => {
-    let nodeGraph: NodeGraph;
-    let root: PlantNode;
-    let child1: PlantNode;
-    let child2: PlantNode;
-    let grandchild: PlantNode;
-    let deepChild: PlantNode;
+    let nodeGraph: ElementGraph;
+    let root: Element;
+    let child1: Element;
+    let child2: Element;
+    let grandchild: Element;
+    let deepChild: Element;
 
     beforeEach(() => {
-      nodeGraph = new NodeGraph();
+      nodeGraph = new ElementGraph();
 
-      root = new PlantNode('Root', {
-        type: Element.type.Application_Collaboration,
+      root = new Element('Root', {
+        type: ArchimateElement.type.Application_Collaboration,
         label: '<b>Root</b>',
       });
 
-      child1 = new PlantNode('Child 1', {
-        type: Element.type.Application_Component,
+      child1 = new Element('Child 1', {
+        type: ArchimateElement.type.Application_Component,
         label: '<b>Child 1</b>',
       });
 
-      child2 = new PlantNode('Child 2', {
-        type: Element.type.Application_Interface,
+      child2 = new Element('Child 2', {
+        type: ArchimateElement.type.Application_Interface,
         label: '<b>Child 2</b>',
       });
 
-      grandchild = new PlantNode('Grandchild', {
-        type: Element.type.Motivation_Constraint,
+      grandchild = new Element('Grandchild', {
+        type: ArchimateElement.type.Motivation_Constraint,
         label: '<b>Grandchild</b>',
       });
 
-      deepChild = new PlantNode('jonny', {
-        type: Element.type.Motivation_Constraint,
+      deepChild = new Element('jonny', {
+        type: ArchimateElement.type.Motivation_Constraint,
         label: '<b>Grandchild</b>',
       });
 
@@ -123,7 +123,7 @@ describe('PlantKit', () => {
 
   describe('Edge cases', () => {
     it('handles nodes without label or type gracefully', () => {
-      const root = new PlantNode('EmptyNode');
+      const root = new Element('EmptyNode');
       expect(() => plantKit.printArchimate(root)).not.toThrow();
     });
   });
@@ -136,12 +136,12 @@ it('should create a new PlantKit instance', () => {
 
 describe('printNode', () => {
   let plantKit: PlantKit;
-  let node: PlantNode;
+  let node: Element;
   let consoleSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     plantKit = new PlantKit();
-    node = new PlantNode('Test Node');
+    node = new Element('Test Node');
     consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
   });
 
@@ -157,8 +157,8 @@ describe('printNode', () => {
   });
 
   it('should print a node with children', () => {
-    const child1 = new PlantNode('Child Node 1');
-    const child2 = new PlantNode('Child Node 2');
+    const child1 = new Element('Child Node 1');
+    const child2 = new Element('Child Node 2');
     node.addChild(child1);
     node.addChild(child2);
 

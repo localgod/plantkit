@@ -10,6 +10,7 @@ tasks:
 
   - name: Install Dependencies
     init: |
+      ./setup.sh
       npm install
 
   - name: Start Typescript Service

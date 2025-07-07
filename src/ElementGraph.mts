@@ -1,13 +1,13 @@
-import { PlantNode } from "./PlantNode.mjs";
+import { Element } from "./Element.mjs";
 type NodeRelation = {
-  source: PlantNode;
-  target: PlantNode;
+  source: Element;
+  target: Element;
   type: string;
   properties?: { [key: string]: string | number };
 };
 
-export class NodeGraph {
-  private nodes: Set<PlantNode>;
+export class ElementGraph {
+  private nodes: Set<Element>;
   private relations: Set<NodeRelation>;
 
   constructor() {
@@ -15,18 +15,18 @@ export class NodeGraph {
     this.relations = new Set();
   }
 
-  public addNode(node: PlantNode): void {
+  public addNode(node: Element): void {
     this.nodes.add(node);
   }
 
-  public addRelation(source: PlantNode, target: PlantNode, type: string, properties?: { [key: string]: string | number }): void {
+  public addRelation(source: Element, target: Element, type: string, properties?: { [key: string]: string | number }): void {
     if (!this.nodes.has(source) || !this.nodes.has(target)) {
       throw new Error("Both nodes must be part of the graph before adding a relation.");
     }
     this.relations.add({ source, target, type, properties });
   }
 
-  public getNodes(): PlantNode[] {
+  public getNodes(): Element[] {
     return Array.from(this.nodes);
   }
 
@@ -34,15 +34,15 @@ export class NodeGraph {
     return Array.from(this.relations);
   }
 
-  public getOutgoingRelations(node: PlantNode): NodeRelation[] {
+  public getOutgoingRelations(node: Element): NodeRelation[] {
     return Array.from(this.relations).filter(rel => rel.source === node);
   }
 
-  public getIncomingRelations(node: PlantNode): NodeRelation[] {
+  public getIncomingRelations(node: Element): NodeRelation[] {
     return Array.from(this.relations).filter(rel => rel.target === node);
   }
 
-  public getConnectedNodes(node: PlantNode): PlantNode[] {
+  public getConnectedNodes(node: Element): Element[] {
     const outgoing = this.getOutgoingRelations(node).map(rel => rel.target);
     const incoming = this.getIncomingRelations(node).map(rel => rel.source);
     return [...new Set([...outgoing, ...incoming])];

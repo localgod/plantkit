@@ -1,7 +1,7 @@
-export class PlantNode {
+export class Element {
   private name: string;
   private properties: { [key: string]: string|number };
-  private children: PlantNode[];
+  private children: Element[];
 
   constructor(name: string, properties?: { [key: string]: string|number }) {
     this.name = name;
@@ -9,7 +9,7 @@ export class PlantNode {
     this.children = [];
   }
 
-  public addChild(node: PlantNode): void {
+  public addChild(node: Element): void {
     this.children.push(node);
   }
 
@@ -21,16 +21,16 @@ export class PlantNode {
     return this.properties;
   }
 
-  public getChildren(): PlantNode[] {
+  public getChildren(): Element[] {
     return this.children;
   }
 
-  public findNode(name: string): PlantNode | null {
+  public findElement(name: string): Element | null {
     if (this.name === name) {
       return this;
     }
     for (const child of this.children) {
-      const node = child.findNode(name);
+      const node = child.findElement(name);
       if (node) {
         return node;
       }

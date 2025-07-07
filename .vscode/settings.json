@@ -1,0 +1,24 @@
+{
+    // PlantUML settings
+    "plantuml.render": "Local",
+    "plantuml.commandArgs": [
+        "-DPLANTUML_LIMIT_SIZE=30000"
+    ],
+    "plantuml.jar": "./plantuml.jar",
+    "plantuml.includepaths": [],
+    "plantuml.diagramsRoot": "",
+    "plantuml.exportOutDir": "out",
+    "plantuml.exportFormat": "png",
+    "plantuml.exportSubFolder": false,
+    "plantuml.exportIncludeFolderHeirarchy": true,
+    "plantuml.jarArgs": [
+        "-DRELATIVE_INCLUDE=."
+    ],
+
+    // Editor settings
+    "editor.renderWhitespace": "all",
+    "editor.renderControlCharacters": true,
+
+    // File settings
+    "files.insertFinalNewline": true,
+}

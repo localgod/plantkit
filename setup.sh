@@ -2,6 +2,17 @@
 echo "Install global npm modules"
 npm install --location=global npm@latest typescript@latest markdownlint-cli@latest
 
+# Install library dependencies
+sudo apt-get -q -y update
+sudo apt-get -q -y install graphviz
+
+
+# Install plantuml library
+VERSION="1.2025.3"
+DIST="pdf"
+echo "Install PlantUML"
+curl -L -s -k https://github.com/plantuml/plantuml/releases/download/v${VERSION}/plantuml-${DIST}-${VERSION}.jar --output plantuml.jar
+
 basepath=https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/
 
 urls=(

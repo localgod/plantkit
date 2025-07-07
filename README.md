@@ -42,11 +42,15 @@ To get started with PlantKit, follow these steps:
 
 1. Install `plantkit` node module using `npm`
 2. Import `plantkit` into your project.
-3. Create a new model using the `PlantNode` class.
-4. Create a new relationship graph using the `NodeGraph` class.
+3. Create a new model using the `Element` class.
+4. Create a new relationship graph using the `ElementGraph` class.
 5. Use the `PlantKit` class to generate a diagram with data from the model and relationship graph.
 
-The 'PlantNode' model supports a three like hirarchy, which can be used to generate a diagram with nested elements. This is purly for visual presentation purposes. Herarchies like composition and aggregation are managed by the `NodeGraph` class.
+The 'Element' model supports a three like hirarchy, which can be used to generate a diagram with nested elements. This is purly for visual presentation purposes. Herarchies like composition and aggregation are managed by the `ElementGraph` class.
+
+## Sample
+
+A sample file ([sample.mts](./src/sample.mts)) has been included in the repository. This file can be used as a starting point for creating a diagram.
 
 ## Contributing
 
