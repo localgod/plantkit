@@ -78,7 +78,7 @@ class PlantKit {
         if (children.length > 0) {
             out.push('  '.repeat(indent) + ArchimateElement(type, name, label) + ' {');
             for (const child of node.getChildren()) {
-                this.toArchimate(child, out ,indent + 1);
+                this.toArchimate(child, out, indent + 1);
             }
             out.push('  '.repeat(indent) + '}')
         } else {
@@ -100,7 +100,7 @@ class PlantKit {
         }
     }
 
-        public toArchimateRelations(elementGraph: ElementGraph, indent = 0): string {
+    public toArchimateRelations(elementGraph: ElementGraph, indent = 0): string {
         const out: string[] = [];
         const relations = elementGraph.getRelations();
         if (relations.length > 0) {

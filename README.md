@@ -50,7 +50,7 @@ The 'Element' model supports a three like hirarchy, which can be used to generat
 
 ## Sample
 
-A sample file ([sample.mts](./src/sample.mts)) has been included in the repository. This file can be used as a starting point for creating a diagram.
+Sample files ([sample.mts](./src/samples/sample01.mts) and [sample2.mts](./src/samples/sample02.mts)) has been included in the repository. These files can be used as a starting point for creating a diagram.
 
 ## Contributing
 

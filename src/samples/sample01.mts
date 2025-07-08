@@ -81,7 +81,7 @@ const integrations: Integration[] = [
 ];
 
 // Create the root element
-const root: Element = new Element('Root', { type: ArchimateElement.type.Other_Location, label: 'Top-level' });
+const root: Element = new Element('Root', { type: ArchimateElement.type.Grouping, label: 'Top-level' });
 // Create the element graph
 const graph: ElementGraph = new ElementGraph();
 graph.addNode(root);
