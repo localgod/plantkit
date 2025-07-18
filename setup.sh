@@ -20,6 +20,9 @@ urls=(
     "${basepath}C4_Container.puml"
     "${basepath}C4_Context.puml"
     "${basepath}C4.puml"
+    "${basepath}C4_Deployment.puml"
+    "${basepath}C4_Dynamic.puml"
+    "${basepath}C4_Sequence.puml"
 )
 echo "Install C4 macros"
 for url in "${urls[@]}"; do
@@ -31,4 +34,7 @@ done
 
 echo "Install Archimate macros"
 curl -L -s -k https://raw.githubusercontent.com/ebbypeter/Archimate-PlantUML/master/Archimate.puml --output Archimate.puml
+
+
+
 

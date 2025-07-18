@@ -1,7 +1,6 @@
-[![🔨CI](https://github.com/localgod/plantkit/actions/workflows/ci.yml/badge.svg)](https://github.com/localgod/plantkit/actions/workflows/ci.yml) ![NPM Downloads](https://img.shields.io/npm/d18m/plantkit) 
-
-
 # PlantKit
+
+[![🔨CI](https://github.com/localgod/plantkit/actions/workflows/ci.yml/badge.svg)](https://github.com/localgod/plantkit/actions/workflows/ci.yml) ![NPM Downloads](https://img.shields.io/npm/d18m/plantkit) ![NPM License](https://img.shields.io/npm/l/plantkit)
 
 PlantKit is a libary that provides tools for generating [PlantUML](https://plantuml.com/) diagrams via an API. The initial focus of the project is on generating [ArchiMate](https://publications.opengroup.org/standards/archimate/specifications/c226) diagrams, but the goal is to support more diagram types in the future.
 
@@ -24,6 +23,10 @@ PlantKit currently supports the following ArchiMate diagram types:
 * **Motivation Layer**
 * **Implementation Layer**
 * **Other_Location Layer**
+  **Junction Or**
+  **Junction And**
+  **Grouping**
+  **Group**
 
 and the following relationship types:
 
