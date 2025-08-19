@@ -27,7 +27,7 @@ function scanDir(dir, relativePath = ".") {
       entry.name !== "index.mts" &&
       entry.name !== "cmd.mts"
     ) {
-      if (entry && entry.path && !entry.path.endsWith("samples") && !entry.path.endsWith("archimate")) {
+      if (entry && entry.path && !entry.path.endsWith("samples")) {
         const importPath = './' + path.join(relativePath, entry.name.replace(/\.mts$/, ".mjs"));
         exportLines.push(`export * from "${importPath.replace(/\\/g, "/")}";`);
       }

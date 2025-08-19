@@ -79,10 +79,10 @@ const RelationType = {
 type RelationTypeKey = keyof typeof RelationType;
 type RelationTypeValue = typeof RelationType[RelationTypeKey];
 
-function Relation(type: RelationTypeValue, from: string, to: string, label: string): string {
+function ArchimateRelation(type: RelationTypeValue, from: string, to: string, label: string): string {
   return `${type}("${from}", "${to}","${label}")`;
 }
 
-Relation.type = RelationType;
+ArchimateRelation.type = RelationType;
 
-export { Relation };
+export { ArchimateRelation };

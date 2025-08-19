@@ -1,6 +1,6 @@
 import { Element } from './Element.mjs';
-import { Element as ArchimateElement } from './archimate/Element.mjs';
-import { Relation } from './archimate/Relation.mjs';
+import { ArchimateElement } from './archimate/ArchimateElement.mjs';
+import { ArchimateRelation } from './archimate/ArchimateRelation.mjs';
 import { ElementGraph } from './ElementGraph.mjs';
 class PlantKit {
     constructor() { }
@@ -95,7 +95,7 @@ class PlantKit {
                 const source = PlantKit.toValidElementName(relation.source.getName());
                 const target = PlantKit.toValidElementName(relation.target.getName());
                 const label = relation.properties ? relation.properties['label'].toString() : '';
-                console.log('  '.repeat(indent + 1) + Relation(type, source, target, label));
+                console.log('  '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }
         }
     }
@@ -109,11 +109,10 @@ class PlantKit {
                 const source = PlantKit.toValidElementName(relation.source.getName());
                 const target = PlantKit.toValidElementName(relation.target.getName());
                 const label = relation.properties ? relation.properties['label'].toString() : '';
-                out.push(' '.repeat(indent + 1) + Relation(type, source, target, label));
+                out.push(' '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }
         }
         return out.join('\n');
     }
 }
-
 export { PlantKit }

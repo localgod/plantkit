@@ -1,9 +1,9 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { PlantKit } from '../src/PlantKit.mjs';
 import { Element } from '../src/Element.mjs';
-import { Element as ArchimateElement } from '../src/archimate/Element.mjs';
+import { ArchimateElement } from '../src/archimate/ArchimateElement.mjs';
 import { ElementGraph } from '../src/ElementGraph.mjs';
-import { Relation } from '../src/archimate/Relation.mjs';
+import { ArchimateRelation } from '../src/archimate/ArchimateRelation.mjs';
 
 describe('PlantKit', () => {
   let plantKit: PlantKit;
@@ -94,9 +94,9 @@ describe('PlantKit', () => {
       nodeGraph.addNode(grandchild);
       nodeGraph.addNode(deepChild);
 
-      nodeGraph.addRelation(root, child1, Relation.type.Rel_Flow, { label: 'Access' });
-      nodeGraph.addRelation(root, child2, Relation.type.Rel_Flow, { label: 'Access' });
-      nodeGraph.addRelation(child1, grandchild, Relation.type.Rel_Access, { label: 'Access' });
+      nodeGraph.addRelation(root, child1, ArchimateRelation.type.Rel_Flow, { label: 'Access' });
+      nodeGraph.addRelation(root, child2, ArchimateRelation.type.Rel_Flow, { label: 'Access' });
+      nodeGraph.addRelation(child1, grandchild, ArchimateRelation.type.Rel_Access, { label: 'Access' });
     });
 
     it('prints Archimate relations correctly', () => {

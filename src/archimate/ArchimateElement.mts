@@ -68,10 +68,10 @@ const ElementType = {
 type ElementTypeKey = keyof typeof ElementType;
 type ElementTypeValue = typeof ElementType[ElementTypeKey];
 
-function Element(type: ElementTypeValue, alias: string, label: string): string {
+function ArchimateElement(type: ElementTypeValue, alias: string, label: string): string {
   return `${type}("${alias}", "${label}")`;
 }
 
-Element.type = ElementType;
+ArchimateElement.type = ElementType;
 
-export { Element };
+export { ArchimateElement };

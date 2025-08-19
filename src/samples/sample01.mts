@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs';
 import { Element } from "../Element.mjs";
-import { Element as ArchimateElement } from "../archimate/Element.mjs";
-import { Relation } from "../archimate/Relation.mjs";
+import { ArchimateElement } from "../archimate/ArchimateElement.mjs";
+import { ArchimateRelation } from "../archimate/ArchimateRelation.mjs";
 import { ElementGraph } from "../ElementGraph.mjs";
 import { PlantKit } from "../PlantKit.mjs";
 import { Diagram } from "../Diagram.mjs";
@@ -115,7 +115,7 @@ integrations.forEach(integration => {
   const source = root.findElement(integration.source)
   const target = root.findElement(integration.target)
   if (source && target) {
-    graph.addRelation(source, target, Relation.type.Rel_Flow, { label: integration.name });
+    graph.addRelation(source, target, ArchimateRelation.type.Rel_Flow, { label: integration.name });
   }
 });
 
@@ -124,7 +124,7 @@ const diagram = new Diagram('Test Diagram', 'Test Title');
 diagram.addInclude('./Archimate.puml');
 diagram.autosprite(ArchimateElement.type.Strategy_Capability)
 diagram.autosprite(ArchimateElement.type.Application_Component)
-diagram.autosprite(Relation.type.Rel_Flow)
+diagram.autosprite(ArchimateRelation.type.Rel_Flow)
 
 // Add elements and relations to the diagram
 const plantkit = new PlantKit();

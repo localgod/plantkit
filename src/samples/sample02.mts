@@ -1,8 +1,8 @@
 import fs, { writeFileSync } from 'fs';
 import { parse } from 'csv';
 import { Element } from "../Element.mjs";
-import { Element as ArchimateElement } from "../archimate/Element.mjs";
-import { Relation } from "../archimate/Relation.mjs";
+import { ArchimateElement } from "../archimate/ArchimateElement.mjs";
+import { ArchimateRelation } from "../archimate/ArchimateRelation.mjs";
 import { ElementGraph } from "../ElementGraph.mjs";
 import { PlantKit } from "../PlantKit.mjs";
 import { Diagram } from "../Diagram.mjs";
@@ -78,7 +78,7 @@ steps.forEach(integration => {
         for (let i = 0; i < integration.nextStepIds.length; i++) {
             const target = root.findElement(integration.nextStepIds[i])
             if (target) {
-                graph.addRelation(source, target, Relation.type.Rel_Flow, { label: integration.label[i] ?? '' });
+                graph.addRelation(source, target, ArchimateRelation.type.Rel_Flow, { label: integration.label[i] ?? '' });
             }
         }
     }
@@ -88,7 +88,7 @@ steps.forEach(integration => {
 const diagram = new Diagram('Demo', 'Demo');
 diagram.addInclude('./Archimate.puml');
 diagram.autosprite(ArchimateElement.type.Application_Component)
-diagram.autosprite(Relation.type.Rel_Flow)
+diagram.autosprite(ArchimateRelation.type.Rel_Flow)
 
 // Add elements and relations to the diagram
 const plantkit = new PlantKit();
