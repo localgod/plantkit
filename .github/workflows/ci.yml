@@ -15,10 +15,10 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
-          check-latest: true
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+         node-version: 'latest'
+         check-latest: true
+         cache: 'npm'
+         cache-dependency-path: 'package-lock.json'
       - name: Install dependencies
         run: |
           ./setup.sh
@@ -33,15 +33,16 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
-          check-latest: true
-          cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+         node-version: 'latest'
+         check-latest: true
+         cache: 'npm'
+         cache-dependency-path: 'package-lock.json'
       - name: Install dependencies
         run: |
           ./setup.sh
           npm ci
-      - name: Lint
+      - name: Test
         run: |
+          npm run prebuild
           npm run build
           npm run test

@@ -95,4 +95,4 @@ class Diagram {
     }
 }
 
-export { Diagram, Sprite };
+export { Diagram, type Sprite };
