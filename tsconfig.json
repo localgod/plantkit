@@ -1,31 +1,36 @@
 {
-  "typeScriptVersion": "5.8.3",
   "compilerOptions": {
-    "strict": true,
-    "target": "es2024",
-    "module": "nodenext",
-    "lib": [
-      "ES2024",
-      "DOM"
-    ],
-    "outDir": "./dist",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    /* Language */
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "resolveJsonModule": true,
-    "typeRoots": [
-      "./node_modules/@types",
-      "./types"
-    ],
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "strictFunctionTypes": true,
-    "strictPropertyInitialization": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "types": ["node"],
+
+    /* Declarations */
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false, 
+
+    /* Output & Interop */
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
-    "emitDeclarationOnly": false,
-    "declaration": true
+    "allowSyntheticDefaultImports": true,
+    "moduleDetection": "force",
+
+    /* Type safety */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+
+    /* Build speed */
+    "skipLibCheck": true
   },
-  "include": [
-    "./**/*"
-  ]
+  "include": ["src/**/*.mts"],
+  "exclude": ["dist", "node_modules", "**/*.spec.mts", "**/*.test.mts"]
 }

@@ -18,12 +18,24 @@
   "license": "MIT",
   "author": "Johannes Skov Frandsen",
   "type": "module",
-  "main": "index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "build": "tsc",
+    "prebuild": "node scripts/generate-index.js",
+    "build": "tsc --project tsconfig.json",
     "dev": "tsc --watch",
     "exec": "node ./dist/src/PlantKit.mjs",
     "lint": "eslint ./src",
