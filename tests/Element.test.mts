@@ -44,5 +44,16 @@ describe('Element', () => {
     it('should not find a non-existent child node', () => {
       expect(node.findElement('Non-existent Node')).toBeNull();
     });
+
+    it('should remove a child element recursively', () => {
+      const parent = new Element('Parent');
+      const child = new Element('Child');
+      const grandchild = new Element('Grandchild');
+      parent.addChild(child);
+      child.addChild(grandchild);
+      expect(parent.getChildren()[0].getChildren()).toContain(grandchild);
+      parent.removeChild(grandchild.getName());
+      expect(parent.getChildren()[0].getChildren()).not.toContain(grandchild);
+    });
   });
 });
