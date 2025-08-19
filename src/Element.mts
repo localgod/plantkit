@@ -1,9 +1,9 @@
 export class Element {
   private name: string;
-  private properties: { [key: string]: string|number };
+  private properties: { [key: string]: string | number };
   private children: Element[];
 
-  constructor(name: string, properties?: { [key: string]: string|number }) {
+  constructor(name: string, properties?: { [key: string]: string | number }) {
     this.name = name;
     this.properties = properties || {};
     this.children = [];
@@ -17,7 +17,7 @@ export class Element {
     return this.name;
   }
 
-  public getProperties(): { [key: string]: string|number } {
+  public getProperties(): { [key: string]: string | number } {
     return this.properties;
   }
 
@@ -25,7 +25,8 @@ export class Element {
     return this.children;
   }
 
-  public findElement(name: string): Element | null {
+
+   public findElement(name: string): Element | null {
     if (this.name === name) {
       return this;
     }
@@ -36,5 +37,19 @@ export class Element {
       }
     }
     return null;
+  }
+
+  public removeChild(name: string): void {
+    this.removeChildRecursive(this, name);
+  }
+
+  private removeChildRecursive(parent: Element, name: string): void {
+    for (const child of parent.children) {
+      if (child.name === name) {
+        parent.children = parent.children.filter(c => c !== child);
+      } else {
+        this.removeChildRecursive(child, name);
+      }
+    }
   }
 }
