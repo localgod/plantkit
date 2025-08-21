@@ -29,6 +29,7 @@ PlantKit uses a dual modeling approach that separates visual presentation from s
 ## ArchiMate Support
 
 ### Element Types (65+ supported)
+
 PlantKit supports all ArchiMate 3.x element types across all layers:
 
 * **Strategy Layer**: Resource, Capability, Course of Action, Value Stream
@@ -41,6 +42,7 @@ PlantKit supports all ArchiMate 3.x element types across all layers:
 * **Other Elements**: Location, Junction (Or/And), Grouping, Group
 
 ### Relationship Types (77+ supported)
+
 Complete support for all ArchiMate relationships with directional variants:
 
 * **Structural**: Composition, Aggregation, Assignment, Specialization
@@ -99,9 +101,10 @@ PlantKit uses a **dual modeling approach**:
 2. **Relationship Graphs** (`ElementGraph` class): Semantic relationships between elements (composition, flow, etc.)
 
 This separation allows you to:
-- Organize elements visually (e.g., group related components)
-- Define semantic relationships independently (e.g., data flows, dependencies)
-- Generate clean, readable diagrams with proper ArchiMate semantics
+
+* Organize elements visually (e.g., group related components)
+* Define semantic relationships independently (e.g., data flows, dependencies)
+* Generate clean, readable diagrams with proper ArchiMate semantics
 
 ### Properties and Metadata
 
@@ -124,6 +127,7 @@ graph.addRelation(app, database, 'Rel_Access_rw', {
 ## API Reference
 
 ### Element Class
+
 ```typescript
 // Create hierarchical element structures
 const parent = new Element('System', { type: 'Application_Component' });
@@ -137,6 +141,7 @@ parent.removeChild('Module');   // Remove child by name
 ```
 
 ### ElementGraph Class
+
 ```typescript
 // Manage semantic relationships
 const graph = new ElementGraph();
@@ -151,6 +156,7 @@ graph.getConnectedNodes(elementA);     // Get all connected nodes
 ```
 
 ### Diagram Class
+
 ```typescript
 // Configure diagram output
 const diagram = new Diagram('my-diagram', 'My Architecture');
@@ -167,6 +173,7 @@ const plantuml = diagram.output();
 ```
 
 ### PlantKit Utilities
+
 ```typescript
 const plantkit = new PlantKit();
 
@@ -183,6 +190,7 @@ plantkit.printArchimate(element);          // Print ArchiMate syntax
 ## Advanced Features
 
 ### Automatic Sprite Management
+
 ```typescript
 // Automatically generates sprites and legends
 diagram.autosprite('Business_Process');
@@ -194,6 +202,7 @@ diagram.autosprite('Rel_Realization');
 ```
 
 ### Type-Safe ArchiMate Generation
+
 ```typescript
 // Type-safe element creation
 const element = ArchimateElement(
@@ -212,6 +221,7 @@ const relation = ArchimateRelation(
 ```
 
 ### Validation and Error Handling
+
 ```typescript
 // ElementGraph validates relationships
 try {
@@ -262,10 +272,11 @@ PlantKit generates production-ready PlantUML with:
 ## TypeScript Support
 
 Full TypeScript support with:
-- Complete type definitions for all classes and functions
-- IntelliSense support in modern IDEs
-- Compile-time validation of ArchiMate element and relationship types
-- Generic type support for properties and metadata
+
+* Complete type definitions for all classes and functions
+* IntelliSense support in modern IDEs
+* Compile-time validation of ArchiMate element and relationship types
+* Generic type support for properties and metadata
 
 ## Contributing
 
@@ -292,4 +303,4 @@ PlantKit is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for det
 
 ---
 
-**Made with ❤️ for the Enterprise Architecture community**
+Made with ❤️ for the Enterprise Architecture community
