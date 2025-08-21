@@ -1,0 +1,56 @@
+@startuml Test Diagram
+!include ./Archimate.puml
+sprite $Strategy_Capability_Sprite jar:archimate/strategy-capability
+sprite $Application_Component_Sprite jar:archimate/application-component
+sprite $Flow_Sprite jar:archimate/flow
+scale 1
+title Test Title
+Grouping("ID_root", "Top-level") {
+  Strategy_Capability("ID_business", "Business-focused capability") {
+    Strategy_Capability("ID_marketing", "Marketing-focused capability")
+    Strategy_Capability("ID_sales", "Sales-focused capability")
+  }
+  Strategy_Capability("ID_technology", "Technology-focused capability") {
+    Strategy_Capability("ID_software", "Software-focused capability") {
+      Strategy_Capability("ID_mobile", "Mobile-focused capability")
+      Strategy_Capability("ID_web", "Web-focused capability")
+    }
+    Strategy_Capability("ID_infrastructure", "Infrastructure-focused capability")
+  }
+  Strategy_Capability("ID_data", "Data-focused capability") {
+    Strategy_Capability("ID_analytics", "Analytics-focused capability")
+    Strategy_Capability("ID_reporting", "Reporting-focused capability")
+    Application_Component("ID_data_warehouse", "Data warehouse for analytics")
+    Application_Component("ID_business_intelligence", "Business intelligence platform")
+    Application_Component("ID_reporting_tool", "Reporting tool for business users")
+  }
+  Strategy_Capability("ID_security", "Security-focused capability") {
+    Strategy_Capability("ID_compliance", "Compliance-focused capability")
+    Strategy_Capability("ID_risk", "Risk-focused capability")
+    Strategy_Capability("ID_audit", "Audit-focused capability")
+    Application_Component("ID_security_monitoring", "Security monitoring system")
+    Application_Component("ID_compliance_management", "Compliance management system")
+    Application_Component("ID_risk_management", "Risk management system")
+    Application_Component("ID_audit_management", "Audit management system")
+  }
+  Strategy_Capability("ID_finance", "Finance-focused capability") {
+    Strategy_Capability("ID_accounting", "Accounting-focused capability")
+    Strategy_Capability("ID_tax", "Tax-focused capability")
+    Application_Component("ID_financial_planning", "Financial planning system")
+    Application_Component("ID_accounting_system", "Accounting system")
+    Application_Component("ID_tax_management", "Tax management system")
+  }
+}
+ Rel_Flow("ID_data_warehouse", "ID_business_intelligence","Data Warehouse to Business Intelligence")
+ Rel_Flow("ID_security_monitoring", "ID_compliance_management","Security Monitoring to Compliance Management")
+ Rel_Flow("ID_financial_planning", "ID_accounting_system","Financial Planning to Accounting System")
+ Rel_Flow("ID_tax_management", "ID_financial_planning","Tax Management to Financial Planning")
+left to right direction
+legend left
+Legend
+====
+<$Strategy_Capability_Sprite>: Strategy Capability
+<$Application_Component_Sprite>: Application Component
+<$Flow_Sprite>: Flow
+endlegend
+@enduml
