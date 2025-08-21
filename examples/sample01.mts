@@ -1,10 +1,5 @@
 import { writeFileSync } from 'fs';
-import { Element } from "../Element.mjs";
-import { ArchimateElement } from "../archimate/ArchimateElement.mjs";
-import { ArchimateRelation } from "../archimate/ArchimateRelation.mjs";
-import { ElementGraph } from "../ElementGraph.mjs";
-import { PlantKit } from "../PlantKit.mjs";
-import { Diagram } from "../Diagram.mjs";
+import { Element, ArchimateElement, ArchimateRelation, ElementGraph, PlantKit, Diagram } from 'plantkit';
 interface Capability {
   name: string;
   description: string;
