@@ -21,7 +21,6 @@ jobs:
          cache-dependency-path: 'package-lock.json'
       - name: Install dependencies
         run: |
-          ./setup.sh
           npm ci
       - name: Lint
         run: |
@@ -42,7 +41,6 @@ jobs:
          cache-dependency-path: 'package-lock.json'
       - name: Install dependencies
         run: |
-          ./setup.sh
           npm ci
       - name: Test
         run: |

@@ -239,6 +239,8 @@ Comprehensive example files demonstrate real-world usage:
 * **[sample01.mts](./examples/sample01.mts)** - Complete business capability model with multiple layers and relationships
 * **[sample02.mts](./examples/sample02.mts)** - CSV data import and process modeling example
 
+You will need to run the `support.sh` script to have the relevant tools ready to check the output.
+
 ### Running Examples
 
 ```bash
