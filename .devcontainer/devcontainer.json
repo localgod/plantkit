@@ -18,9 +18,7 @@
 		"vscode": {
 			"extensions": [
 				"jebbs.plantuml",
-				"redhat.vscode-xml",
 				"DavidAnson.vscode-markdownlint",
-				"hediet.vscode-drawio",
 				"usernamehw.errorlens"
 			]
 		}

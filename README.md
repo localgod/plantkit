@@ -282,22 +282,20 @@ Full TypeScript support with:
 
 ## Contributing
 
-We welcome contributions to PlantKit! Here's how you can help:
+We welcome contributions to PlantKit! Whether you're fixing bugs, adding features, improving documentation, or sharing examples, your help is appreciated.
 
-* **Report Issues** - [Create an issue](https://github.com/localgod/plantkit/issues) for bugs or feature requests
-* **Submit PRs** - Contribute code improvements, tests, or documentation
-* **Share Examples** - Show us how you're using PlantKit in your projects
-* **Improve Documentation** - Help make the library more accessible
+Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
 
-### Development Setup
+* Development setup and workflow
+* Coding standards and best practices
+* Testing requirements
+* Pull request process
 
-```bash
-git clone https://github.com/localgod/plantkit.git
-cd plantkit
-npm install
-npm run build
-npm test
-```
+**Quick Links:**
+
+* [Report a Bug](https://github.com/localgod/plantkit/issues/new?template=bug_report.md)
+* [Request a Feature](https://github.com/localgod/plantkit/issues/new?template=feature_request.md)
+* [View Open Issues](https://github.com/localgod/plantkit/issues)
 
 ## License
 
