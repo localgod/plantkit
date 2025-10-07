@@ -58,8 +58,27 @@ npm install plantkit
 
 ## Quick Start
 
+### Simple API (Recommended)
+
 ```typescript
-import { Element, ElementGraph, Diagram, PlantKit, ArchimateElement, ArchimateRelation } from 'plantkit';
+import { PlantKit } from 'plantkit';
+
+// Create diagram with fluent API
+const output = PlantKit.create('business-model', 'Business Model')
+  .addElement('customer', 'Business_Actor', 'Customer')
+  .addElement('orderProcess', 'Business_Process', 'Order Processing')
+  .addRelation('customer', 'orderProcess', 'Rel_Triggering', 'initiates')
+  .generate();
+
+console.log(output);
+```
+
+### Advanced API (Full Control)
+
+For complex scenarios requiring hierarchies or advanced features:
+
+```typescript
+import { Element, ElementGraph, Diagram, PlantKit } from 'plantkit';
 
 // Create elements with properties
 const customer = new Element('Customer', { 
@@ -125,6 +144,92 @@ graph.addRelation(app, database, 'Rel_Access_rw', {
 ```
 
 ## API Reference
+
+### PlantKit Facade (Simple API)
+
+The `PlantKit` class provides a fluent, easy-to-use API for common use cases:
+
+```typescript
+// Create a new diagram
+const kit = PlantKit.create('diagram-name', 'Diagram Title');
+
+// Add elements (chainable)
+kit.addElement(id, type, label, properties?);
+
+// Add relationships (chainable)
+kit.addRelation(fromId, toId, relationType, label?);
+
+// Get element for hierarchies or advanced manipulation
+const element = kit.getElement(id);
+
+// Configure diagram (chainable)
+kit.setScale(1.5);
+kit.setLayout('top to bottom direction');
+kit.addInclude('./custom.puml');
+
+// Generate output
+const plantuml = kit.generate();
+
+// Access underlying objects for advanced use
+kit.diagram  // Access Diagram instance
+kit.graph    // Access ElementGraph instance
+kit.getElement(id)  // Retrieve element by ID
+```
+
+**Example - Complete Workflow:**
+
+```typescript
+const output = PlantKit.create('architecture', 'System Architecture')
+  .addElement('frontend', 'Application_Component', 'Web Frontend')
+  .addElement('backend', 'Application_Component', 'API Backend')
+  .addElement('database', 'Technology_Node', 'Database')
+  .addRelation('frontend', 'backend', 'Rel_Flow', 'API calls')
+  .addRelation('backend', 'database', 'Rel_Access_rw', 'reads/writes')
+  .setScale(1.2)
+  .generate();
+```
+
+**Example - With Hierarchies:**
+
+```typescript
+const kit = PlantKit.create('hierarchy', 'Business Capabilities');
+
+// Add elements
+kit.addElement('business', 'Grouping', 'Business Layer')
+   .addElement('marketing', 'Strategy_Capability', 'Marketing')
+   .addElement('sales', 'Strategy_Capability', 'Sales');
+
+// Build hierarchy using getElement
+const parent = kit.getElement('business');
+const marketing = kit.getElement('marketing');
+const sales = kit.getElement('sales');
+
+if (parent && marketing && sales) {
+  parent.addChild(marketing);
+  parent.addChild(sales);
+}
+
+const output = kit.generate();
+```
+
+**Example - Advanced Configuration:**
+
+```typescript
+const kit = PlantKit.create('custom', 'Custom Diagram');
+
+// Use fluent API
+kit.addElement('e1', 'Business_Actor', 'Actor')
+   .addElement('e2', 'Business_Process', 'Process');
+
+// Access diagram for advanced features
+kit.diagram.addInclude('./Archimate.puml');
+kit.diagram.setLayout('top to bottom direction');
+
+// Access graph for queries
+const relations = kit.graph.getOutgoingRelations(someElement);
+
+const output = kit.generate();
+```
 
 ### Element Class
 

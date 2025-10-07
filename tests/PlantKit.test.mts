@@ -23,6 +23,184 @@ describe('PlantKit', () => {
     expect(plantKit).toBeInstanceOf(PlantKit);
   });
 
+  describe('Facade API', () => {
+    describe('create', () => {
+      it('creates a new PlantKit instance with name and title', () => {
+        const kit = PlantKit.create('test-diagram', 'Test Title');
+        expect(kit).toBeInstanceOf(PlantKit);
+        expect(kit.diagram).toBeDefined();
+        expect(kit.graph).toBeDefined();
+      });
+    });
+
+    describe('addElement', () => {
+      it('adds an element and returns this for chaining', () => {
+        const kit = PlantKit.create('test', 'Test');
+        const result = kit.addElement('customer', 'Business_Actor', 'Customer');
+        
+        expect(result).toBe(kit);
+        const element = kit.getElement('customer');
+        expect(element).toBeInstanceOf(Element);
+        expect(element?.getName()).toBe('customer');
+        expect(element?.getProperties()['type']).toBe('Business_Actor');
+        expect(element?.getProperties()['label']).toBe('Customer');
+      });
+
+      it('adds element to internal graph', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        
+        expect(kit.graph.getNodes()).toHaveLength(1);
+      });
+
+      it('stores element in internal map', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('customer', 'Business_Actor', 'Customer');
+        
+        const retrieved = kit.getElement('customer');
+        expect(retrieved).toBeDefined();
+        expect(retrieved?.getName()).toBe('customer');
+      });
+
+      it('supports additional properties', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('db', 'Technology_Node', 'Database', { 
+          technology: 'PostgreSQL',
+          version: '14.0'
+        });
+        
+        const element = kit.getElement('db');
+        expect(element?.getProperties()['technology']).toBe('PostgreSQL');
+        expect(element?.getProperties()['version']).toBe('14.0');
+      });
+    });
+
+    describe('addRelation', () => {
+      it('adds a relation between elements', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor 1');
+        kit.addElement('e2', 'Business_Process', 'Process 1');
+        
+        kit.addRelation('e1', 'e2', 'Rel_Triggering', 'initiates');
+        
+        const relations = kit.graph.getRelations();
+        expect(relations).toHaveLength(1);
+        expect(relations[0].type).toBe('Rel_Triggering');
+      });
+
+      it('returns this for chaining', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        kit.addElement('e2', 'Business_Process', 'Process');
+        
+        const result = kit.addRelation('e1', 'e2', 'Rel_Flow');
+        expect(result).toBe(kit);
+      });
+
+      it('throws error if source element not found', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e2', 'Business_Process', 'Process');
+        
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow'))
+          .toThrow('Element not found: e1');
+      });
+
+      it('throws error if target element not found', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow'))
+          .toThrow('Element not found: e2');
+      });
+    });
+
+    describe('fluent API', () => {
+      it('supports method chaining', () => {
+        const kit = PlantKit.create('test', 'Test')
+          .setScale(1.5)
+          .setLayout('top to bottom direction')
+          .addInclude('./test.puml');
+        
+        expect(kit).toBeInstanceOf(PlantKit);
+      });
+
+      it('chains element and relation additions', () => {
+        const output = PlantKit.create('test', 'Test')
+          .addElement('e1', 'Business_Actor', 'Actor')
+          .addElement('e2', 'Business_Process', 'Process')
+          .addRelation('e1', 'e2', 'Rel_Triggering', 'initiates')
+          .generate();
+        
+        expect(output).toContain('@startuml test');
+        expect(output).toContain('Business_Actor');
+        expect(output).toContain('Business_Process');
+      });
+    });
+
+    describe('generate', () => {
+      it('generates complete PlantUML output', () => {
+        const output = PlantKit.create('business-model', 'Business Model')
+          .addElement('customer', 'Business_Actor', 'Customer')
+          .addElement('orderProcess', 'Business_Process', 'Order Processing')
+          .addRelation('customer', 'orderProcess', 'Rel_Triggering', 'initiates')
+          .generate();
+        
+        expect(output).toContain('@startuml business-model');
+        expect(output).toContain('title Business Model');
+        expect(output).toContain('Business_Actor("ID_customer", "Customer")');
+        expect(output).toContain('Business_Process("ID_orderprocess", "Order Processing")');
+        expect(output).toContain('Rel_Triggering');
+        expect(output).toContain('@enduml');
+      });
+
+      it('auto-generates sprites', () => {
+        const output = PlantKit.create('test', 'Test')
+          .addElement('e1', 'Business_Actor', 'Actor')
+          .generate();
+        
+        expect(output).toContain('sprite $Business_Actor_Sprite');
+      });
+    });
+
+    describe('diagram access', () => {
+      it('provides access to underlying diagram', () => {
+        const kit = PlantKit.create('test', 'Test');
+        expect(kit.diagram).toBeDefined();
+        
+        kit.diagram.setScale(2.0);
+        const output = kit.generate();
+        expect(output).toContain('scale 2');
+      });
+    });
+
+    describe('graph access', () => {
+      it('provides access to underlying graph', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        
+        expect(kit.graph).toBeDefined();
+        expect(kit.graph.getNodes()).toHaveLength(1);
+      });
+    });
+
+    describe('getElement', () => {
+      it('retrieves element by id', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('customer', 'Business_Actor', 'Customer');
+        
+        const element = kit.getElement('customer');
+        expect(element).toBeDefined();
+        expect(element?.getName()).toBe('customer');
+      });
+
+      it('returns undefined for non-existent element', () => {
+        const kit = PlantKit.create('test', 'Test');
+        const element = kit.getElement('nonexistent');
+        expect(element).toBeUndefined();
+      });
+    });
+  });
+
 
   describe('printNode', () => {
     it('prints hierarchical node tree correctly', () => {
