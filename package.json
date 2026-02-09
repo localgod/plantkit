@@ -45,7 +45,7 @@
     "test:coverage": "vitest --coverage"
   },
   "devDependencies": {
-    "@eslint/js": "^9.30.0",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^4.0.8",
     "csv": "^6.3.11",
