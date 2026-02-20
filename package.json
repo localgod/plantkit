@@ -38,22 +38,19 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --watch",
     "exec": "node ./dist/src/PlantKit.mjs",
-    "lint": "eslint ./src",
-    "lint:fix": "eslint --fix ./src",
+    "lint": "oxlint ./src",
+    "lint:fix": "oxlint --fix ./src",
     "mdlint": "markdownlint '**/*.md' --ignore node_modules --ignore slides --disable MD033 MD013 MD041",
     "test": "vitest",
     "test:coverage": "vitest --coverage"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^4.0.8",
     "csv": "^6.3.11",
-    "eslint": "^10.0.0",
-    "globals": "^17.0.0",
     "markdownlint-cli": "^0.47.0",
+    "oxlint": "^1.49.0",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.35.1",
     "vitest": "^4.0.8"
   }
 }
