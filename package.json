@@ -48,7 +48,7 @@
     "@types/node": "^25.0.2",
     "@vitest/coverage-v8": "^4.0.8",
     "csv": "^6.3.11",
-    "markdownlint-cli": "^0.47.0",
+    "markdownlint-cli": "^0.48.0",
     "oxlint": "^1.49.0",
     "typescript": "^5.7.2",
     "vitest": "^4.0.8"
