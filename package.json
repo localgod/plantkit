@@ -42,6 +42,7 @@
     "lint:fix": "oxlint --fix ./src",
     "mdlint": "markdownlint '**/*.md' --ignore node_modules --ignore slides --disable MD033 MD013 MD041",
     "test": "vitest",
+    "test:plantuml": "bash scripts/smoke-plantuml.sh",
     "test:coverage": "vitest --coverage"
   },
   "devDependencies": {

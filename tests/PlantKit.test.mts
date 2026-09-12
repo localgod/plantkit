@@ -62,6 +62,30 @@ describe('PlantKit', () => {
         expect(retrieved?.getName()).toBe('customer');
       });
 
+      it('rejects a duplicate element id', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('customer', 'Business_Actor', 'Customer');
+
+        expect(() => kit.addElement('customer', 'Business_Role', 'Customer role'))
+          .toThrow('Duplicate element id: customer');
+        expect(kit.graph.getNodes()).toHaveLength(1);
+      });
+
+      it('rejects IDs that produce a duplicate PlantUML alias', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('Order Process', 'Business_Process', 'Order process');
+
+        expect(() => kit.addElement('order-process', 'Business_Process', 'Replacement process'))
+          .toThrow('Duplicate PlantUML element alias: ID_order_process');
+      });
+
+      it('rejects an unknown element type', () => {
+        const kit = PlantKit.create('test', 'Test');
+
+        expect(() => kit.addElement('customer', 'Unknown_Type' as never, 'Customer'))
+          .toThrow('Unknown ArchiMate element type: Unknown_Type');
+      });
+
       it('supports additional properties', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('db', 'Technology_Node', 'Database', { 
@@ -72,6 +96,14 @@ describe('PlantKit', () => {
         const element = kit.getElement('db');
         expect(element?.getProperties()['technology']).toBe('PostgreSQL');
         expect(element?.getProperties()['version']).toBe('14.0');
+      });
+
+      it('rejects properties that override the validated type or label', () => {
+        const kit = PlantKit.create('test', 'Test');
+
+        expect(() => kit.addElement('db', 'Technology_Node', 'Database', {
+          type: 'Unknown_Type',
+        })).toThrow('Element properties cannot override type or label');
       });
     });
 
@@ -112,6 +144,15 @@ describe('PlantKit', () => {
         expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow'))
           .toThrow('Element not found: e2');
       });
+
+      it('rejects an unknown relationship type', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        kit.addElement('e2', 'Business_Process', 'Process');
+
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Unknown' as never))
+          .toThrow('Unknown ArchiMate relationship type: Rel_Unknown');
+      });
     });
 
     describe('fluent API', () => {
@@ -138,6 +179,37 @@ describe('PlantKit', () => {
     });
 
     describe('generate', () => {
+      it('reports graph nodes that are not managed by the facade', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.graph.addNode(new Element('orphan', {
+          type: 'Business_Actor',
+          label: 'Orphan',
+        }));
+
+        expect(kit.validate()).toEqual([{
+          code: 'GRAPH_NODE_UNMANAGED',
+          message: 'Graph node orphan is not managed by this PlantKit instance',
+        }]);
+        expect(() => kit.generate()).toThrow('Invalid ArchiMate model:\nGraph node orphan is not managed by this PlantKit instance');
+      });
+
+      it('reports graph mutations that make the model invalid before rendering', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        kit.addElement('e2', 'Business_Process', 'Process');
+        kit.graph.addRelation(
+          kit.getElement('e1')!,
+          kit.getElement('e2')!,
+          'Rel_Unknown',
+        );
+
+        expect(kit.validate()).toEqual([{
+          code: 'RELATION_TYPE_UNKNOWN',
+          message: 'Relationship has unknown ArchiMate type: Rel_Unknown',
+        }]);
+        expect(() => kit.generate()).toThrow('Invalid ArchiMate model:\nRelationship has unknown ArchiMate type: Rel_Unknown');
+      });
+
       it('generates complete PlantUML output', () => {
         const output = PlantKit.create('business-model', 'Business Model')
           .addElement('customer', 'Business_Actor', 'Customer')
@@ -151,6 +223,30 @@ describe('PlantKit', () => {
         expect(output).toContain('Business_Process("ID_orderprocess", "Order Processing")');
         expect(output).toContain('Rel_Triggering');
         expect(output).toContain('@enduml');
+      });
+
+      it('does not duplicate generated content when called repeatedly', () => {
+        const kit = PlantKit.create('test', 'Test')
+          .addElement('customer', 'Business_Actor', 'Customer');
+
+        kit.generate();
+        const output = kit.generate();
+
+        expect(output.match(/Business_Actor\("ID_customer", "Customer"\)/g)).toHaveLength(1);
+      });
+
+      it('renders a relationship with properties but no label', () => {
+        const kit = PlantKit.create('test', 'Test');
+        kit.addElement('e1', 'Business_Actor', 'Actor');
+        kit.addElement('e2', 'Business_Process', 'Process');
+        kit.graph.addRelation(
+          kit.getElement('e1')!,
+          kit.getElement('e2')!,
+          'Rel_Flow',
+          { metadata: 'value' },
+        );
+
+        expect(kit.generate()).toContain('Rel_Flow("ID_e1", "ID_e2","")');
       });
 
       it('auto-generates sprites', () => {

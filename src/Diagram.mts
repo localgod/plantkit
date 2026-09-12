@@ -1,3 +1,5 @@
+import { getArchimateSprite, isArchimateSpriteType, type ArchimateSpriteType } from './archimate/ArchimateSprite.mjs';
+
 interface Sprite {
     alias: string;
     path: string;
@@ -10,6 +12,7 @@ class Diagram {
     private scale = 1.0;
     private layout = 'left to right direction';
     private body: string[] = [];
+    private generatedBody: string[] = [];
     private readonly includes: string[] = [];
     private readonly sprites: Sprite[] = [];
 
@@ -42,6 +45,9 @@ class Diagram {
     addToBody(text: string): void {
         this.body.push(text);
     }
+    setGeneratedBody(body: string[]): void {
+        this.generatedBody = body;
+    }
     output(): string {
         const result: string[] = [];
         result.push(`@startuml ${this.name}`);
@@ -49,7 +55,7 @@ class Diagram {
         this.processSprites(result);
         result.push(`scale ${this.scale}`);
         result.push(`title ${this.title}`);
-        result.push(this.body.join('\n'));
+        result.push([...this.body, ...this.generatedBody].join('\n'));
         result.push(`${this.layout}`);
         this.addLegend(result);
         result.push(`@enduml`);
@@ -62,19 +68,11 @@ class Diagram {
         });
     }
 
-    public autosprite(type: string): void {
-        const regex = /^Rel_(.*?)(?:_|$)/i;
-        if (type.startsWith('Rel')) {
-            const m = type.match(regex)
-            type = m ? m[1] : '';
+    public autosprite(type: ArchimateSpriteType): void {
+        if (!isArchimateSpriteType(type)) {
+            throw new Error(`Unknown ArchiMate sprite type: ${type}`);
         }
-        if (type === 'Realization') {
-            type = 'Realisation'
-        }
-        const alias = `${type}_Sprite`
-        const path = `${type.replace('_', '-').toLowerCase()}`
-        const label = `${type.replace('_', ' ')}`
-        this.addSprite({ alias, path, label })
+        this.addSprite(getArchimateSprite(type));
     }
 
     private processIncludes(result: string[]): void {

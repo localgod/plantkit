@@ -39,6 +39,17 @@ describe('Diagram', () => {
         expect(output).toContain('sprite $Flow_Sprite jar:archimate/flow');
     });
 
+    it('uses the Archimate-PlantUML Realisation sprite spelling', () => {
+        diagram.autosprite('Rel_Realization');
+
+        expect(diagram.output()).toContain('sprite $Realisation_Sprite jar:archimate/realisation');
+    });
+
+    it('rejects an unknown ArchiMate sprite type', () => {
+        expect(() => diagram.autosprite('Unknown_Type' as never))
+            .toThrow('Unknown ArchiMate sprite type: Unknown_Type');
+    });
+
     it('should add elements to the body of the diagram', () => {
         diagram.addToBody('Business_Role(BU_1, "Customers")');
         diagram.addToBody('Rel_Flow_Down(APP_7, APP_6, "Data")');
@@ -46,6 +57,17 @@ describe('Diagram', () => {
         const output = diagram.output();
         expect(output).toContain('Business_Role(BU_1, "Customers');
         expect(output).toContain('Rel_Flow_Down(APP_7, APP_6, "Data")');
+    });
+
+    it('preserves manually added body content when generated content is replaced', () => {
+        diagram.addToBody('manual content');
+        diagram.setGeneratedBody(['first generated content']);
+        diagram.setGeneratedBody(['updated generated content']);
+
+        const output = diagram.output();
+        expect(output).toContain('manual content');
+        expect(output).toContain('updated generated content');
+        expect(output).not.toContain('first generated content');
     });
 
 

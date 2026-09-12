@@ -3,5 +3,6 @@
 /dist
 /*.jar
 /*.puml
+!tests/fixtures/plantuml-smoke.puml
 /*.csv
 /out

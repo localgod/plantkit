@@ -84,7 +84,7 @@ The Gitpod environment includes:
 - **`npm run dev`** - Watch mode for development
 - **`npm test`** - Run tests with Vitest
 - **`npm run test:coverage`** - Run tests with coverage report
-- **`npm run lint`** - Lint source code with ESLint
+- **`npm run lint`** - Lint source code with Oxlint
 - **`npm run lint:fix`** - Auto-fix linting issues
 - **`npm run mdlint`** - Lint markdown files
 
@@ -159,7 +159,7 @@ test: add coverage for edge cases in PlantKit.toValidElementName
 - **Indentation:** 4 spaces (configured in project)
 - **Quotes:** Single quotes for strings
 - **Semicolons:** Not required (project uses ASI)
-- **Line length:** Keep reasonable (ESLint configured)
+- **Line length:** Keep reasonable (Oxlint configured)
 - Follow existing patterns in the codebase
 
 ### File Organization
@@ -282,7 +282,7 @@ Before submitting, ensure:
 
 All pull requests automatically run:
 
-- **Linting** - ESLint and markdownlint
+- **Linting** - Oxlint and markdownlint
 - **Tests** - Full test suite with coverage
 - **Build** - TypeScript compilation
 
