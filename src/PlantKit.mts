@@ -1,8 +1,13 @@
 import { Element } from './Element.mjs';
-import { ArchimateElement } from './archimate/ArchimateElement.mjs';
-import { ArchimateRelation } from './archimate/ArchimateRelation.mjs';
+import { ArchimateElement, isArchimateElementType, type ArchimateElementType } from './archimate/ArchimateElement.mjs';
+import { ArchimateRelation, isArchimateRelationType, type ArchimateRelationType } from './archimate/ArchimateRelation.mjs';
 import { ElementGraph } from './ElementGraph.mjs';
 import { Diagram } from './Diagram.mjs';
+
+export interface ValidationDiagnostic {
+    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
+    message: string;
+}
 
 class PlantKit {
     private diagramInstance?: Diagram;
@@ -23,12 +28,25 @@ class PlantKit {
 
     public addElement(
         id: string,
-        type: string,
+        type: ArchimateElementType,
         label: string,
         properties?: { [key: string]: string | number }
     ): this {
         if (!this.elements || !this.graphInstance) {
             throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+        if (!isArchimateElementType(type)) {
+            throw new Error(`Unknown ArchiMate element type: ${type}`);
+        }
+        if (this.elements.has(id)) {
+            throw new Error(`Duplicate element id: ${id}`);
+        }
+        const alias = PlantKit.toValidElementName(id);
+        if (Array.from(this.elements.values()).some(element => PlantKit.toValidElementName(element.getName()) === alias)) {
+            throw new Error(`Duplicate PlantUML element alias: ${alias}`);
+        }
+        if (properties && ('type' in properties || 'label' in properties)) {
+            throw new Error('Element properties cannot override type or label');
         }
         const element = new Element(id, { type, label, ...properties });
         this.elements.set(id, element);
@@ -39,11 +57,14 @@ class PlantKit {
     public addRelation(
         fromId: string,
         toId: string,
-        type: string,
+        type: ArchimateRelationType,
         label?: string
     ): this {
         if (!this.elements || !this.graphInstance) {
             throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+        if (!isArchimateRelationType(type)) {
+            throw new Error(`Unknown ArchiMate relationship type: ${type}`);
         }
         const source = this.elements.get(fromId);
         const target = this.elements.get(toId);
@@ -90,28 +111,91 @@ class PlantKit {
         this.elements.forEach(element => {
             const type = element.getProperties()['type'];
             if (type) {
-                diagram.autosprite(type.toString());
+                const elementType = type.toString();
+                if (!isArchimateElementType(elementType)) {
+                    throw new Error(`Unknown ArchiMate element type: ${elementType}`);
+                }
+                diagram.autosprite(elementType);
             }
         });
 
         graph.getRelations().forEach(rel => {
+            if (!isArchimateRelationType(rel.type)) {
+                throw new Error(`Unknown ArchiMate relationship type: ${rel.type}`);
+            }
             diagram.autosprite(rel.type);
         });
 
         return this;
     }
 
+    public validate(): ValidationDiagnostic[] {
+        if (!this.elements || !this.graphInstance) {
+            throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+
+        const diagnostics: ValidationDiagnostic[] = [];
+        const graphElements = new Set(this.elements.values());
+
+        this.graphInstance.getNodes().forEach(node => {
+            if (!graphElements.has(node)) {
+                diagnostics.push({
+                    code: 'GRAPH_NODE_UNMANAGED',
+                    message: `Graph node ${node.getName()} is not managed by this PlantKit instance`,
+                });
+            }
+        });
+
+        this.elements.forEach(element => {
+            const type = element.getProperties()['type']?.toString();
+            if (!type) {
+                diagnostics.push({
+                    code: 'ELEMENT_TYPE_MISSING',
+                    message: `Element ${element.getName()} has no ArchiMate type`,
+                });
+            } else if (!isArchimateElementType(type)) {
+                diagnostics.push({
+                    code: 'ELEMENT_TYPE_UNKNOWN',
+                    message: `Element ${element.getName()} has unknown ArchiMate type: ${type}`,
+                });
+            }
+        });
+
+        this.graphInstance.getRelations().forEach(relation => {
+            if (!isArchimateRelationType(relation.type)) {
+                diagnostics.push({
+                    code: 'RELATION_TYPE_UNKNOWN',
+                    message: `Relationship has unknown ArchiMate type: ${relation.type}`,
+                });
+            }
+            if (!graphElements.has(relation.source) || !graphElements.has(relation.target)) {
+                diagnostics.push({
+                    code: 'RELATION_ENDPOINT_UNKNOWN',
+                    message: `Relationship endpoint is not managed by this PlantKit instance`,
+                });
+            }
+        });
+
+        return diagnostics;
+    }
+
     public generate(): string {
         if (!this.elements || !this.graphInstance || !this.diagramInstance) {
             throw new Error('PlantKit must be created with create() method to use facade API');
         }
+        const diagnostics = this.validate();
+        if (diagnostics.length > 0) {
+            throw new Error(`Invalid ArchiMate model:\n${diagnostics.map(diagnostic => diagnostic.message).join('\n')}`);
+        }
         this.autoSprites();
 
+        const body: string[] = [];
         this.elements.forEach(element => {
-            this.diagramInstance!.addToBody(this.toArchimate(element));
+            body.push(this.toArchimate(element));
         });
 
-        this.diagramInstance.addToBody(this.toArchimateRelations(this.graphInstance));
+        body.push(this.toArchimateRelations(this.graphInstance));
+        this.diagramInstance.setGeneratedBody(body);
 
         return this.diagramInstance.output();
     }
@@ -182,15 +266,18 @@ class PlantKit {
         if (Object.prototype.hasOwnProperty.call(properties, "label")) {
             label = properties['label'].toString();
         }
+        if (type && !isArchimateElementType(type)) {
+            throw new Error(`Unknown ArchiMate element type: ${type}`);
+        }
 
         if (children.length > 0) {
-            console.log('  '.repeat(indent) + ArchimateElement(type, name, label) + ' {');
+            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label) + ' {');
             for (const child of node.getChildren()) {
                 this.printArchimate(child, indent + 1);
             }
             console.log('  '.repeat(indent) + '}');
         } else {
-            console.log('  '.repeat(indent) + ArchimateElement(type, name, label));
+            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label));
         }
     }
 
@@ -206,15 +293,18 @@ class PlantKit {
         if (Object.prototype.hasOwnProperty.call(properties, "label")) {
             label = properties['label'].toString();
         }
+        if (type && !isArchimateElementType(type)) {
+            throw new Error(`Unknown ArchiMate element type: ${type}`);
+        }
 
         if (children.length > 0) {
-            out.push('  '.repeat(indent) + ArchimateElement(type, name, label) + ' {');
+            out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label) + ' {');
             for (const child of node.getChildren()) {
                 this.toArchimate(child, out, indent + 1);
             }
             out.push('  '.repeat(indent) + '}')
         } else {
-            out.push('  '.repeat(indent) + ArchimateElement(type, name, label));
+            out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label));
         }
         return out.join('\n');
     }
@@ -224,9 +314,12 @@ class PlantKit {
         if (relations.length > 0) {
             for (const relation of relations) {
                 const type = relation.type.toString();
+                if (!isArchimateRelationType(type)) {
+                    throw new Error(`Unknown ArchiMate relationship type: ${type}`);
+                }
                 const source = PlantKit.toValidElementName(relation.source.getName());
                 const target = PlantKit.toValidElementName(relation.target.getName());
-                const label = relation.properties ? relation.properties['label'].toString() : '';
+                const label = relation.properties?.['label']?.toString() ?? '';
                 console.log('  '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }
         }
@@ -238,9 +331,12 @@ class PlantKit {
         if (relations.length > 0) {
             for (const relation of relations) {
                 const type = relation.type.toString();
+                if (!isArchimateRelationType(type)) {
+                    throw new Error(`Unknown ArchiMate relationship type: ${type}`);
+                }
                 const source = PlantKit.toValidElementName(relation.source.getName());
                 const target = PlantKit.toValidElementName(relation.target.getName());
-                const label = relation.properties ? relation.properties['label'].toString() : '';
+                const label = relation.properties?.['label']?.toString() ?? '';
                 out.push(' '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }
         }

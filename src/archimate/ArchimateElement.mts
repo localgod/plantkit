@@ -1,4 +1,6 @@
 
+import { escapePlantUmlString } from './PlantUmlString.mjs';
+
 const ElementType = {
   Strategy_Resource: 'Strategy_Resource',
   Strategy_Capability: 'Strategy_Capability',
@@ -48,6 +50,7 @@ const ElementType = {
   Motivation_Driver: 'Motivation_Driver',
   Motivation_Assessment: 'Motivation_Assessment',
   Motivation_Goal: 'Motivation_Goal',
+  Motivation_Outcome: 'Motivation_Outcome',
   Motivation_Principle: 'Motivation_Principle',
   Motivation_Requirement: 'Motivation_Requirement',
   Motivation_Constraint: 'Motivation_Constraint',
@@ -63,13 +66,17 @@ const ElementType = {
   Junction_And: 'Junction_And',
   Grouping: 'Grouping',
   Group: 'Group',
-}
+} as const;
 
 type ElementTypeKey = keyof typeof ElementType;
-type ElementTypeValue = typeof ElementType[ElementTypeKey];
+export type ArchimateElementType = typeof ElementType[ElementTypeKey];
 
-function ArchimateElement(type: ElementTypeValue, alias: string, label: string): string {
-  return `${type}("${alias}", "${label}")`;
+export function isArchimateElementType(type: string): type is ArchimateElementType {
+  return Object.values(ElementType).includes(type as ArchimateElementType);
+}
+
+function ArchimateElement(type: ArchimateElementType, alias: string, label: string): string {
+  return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlString(label)}")`;
 }
 
 ArchimateElement.type = ElementType;

@@ -1,3 +1,5 @@
+import { escapePlantUmlString } from './PlantUmlString.mjs';
+
 const RelationType = {
     Rel_Composition: "Rel_Composition",
     Rel_Composition_Up: "Rel_Composition_Up",
@@ -74,13 +76,17 @@ const RelationType = {
     Rel_Influence_Down: "Rel_Influence_Down",
     Rel_Influence_Left: "Rel_Influence_Left",
     Rel_Influence_Right: "Rel_Influence_Right",
-}
+  } as const;
 
 type RelationTypeKey = keyof typeof RelationType;
-type RelationTypeValue = typeof RelationType[RelationTypeKey];
+export type ArchimateRelationType = typeof RelationType[RelationTypeKey];
 
-function ArchimateRelation(type: RelationTypeValue, from: string, to: string, label: string): string {
-  return `${type}("${from}", "${to}","${label}")`;
+export function isArchimateRelationType(type: string): type is ArchimateRelationType {
+  return Object.values(RelationType).includes(type as ArchimateRelationType);
+}
+
+function ArchimateRelation(type: ArchimateRelationType, from: string, to: string, label: string): string {
+  return `${type}("${escapePlantUmlString(from)}", "${escapePlantUmlString(to)}","${escapePlantUmlString(label)}")`;
 }
 
 ArchimateRelation.type = RelationType;

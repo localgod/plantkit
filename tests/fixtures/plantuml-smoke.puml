@@ -1,0 +1,7 @@
+@startuml
+!include Archimate.puml
+
+Business_Actor(customer, "Customer")
+Motivation_Outcome(outcome, "Reduced delivery time")
+Rel_Influence(customer, outcome, "influences")
+@enduml

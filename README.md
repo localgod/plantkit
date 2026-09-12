@@ -2,11 +2,11 @@
 
 [![🔨CI](https://github.com/localgod/plantkit/actions/workflows/ci.yml/badge.svg)](https://github.com/localgod/plantkit/actions/workflows/ci.yml) ![NPM Downloads](https://img.shields.io/npm/d18m/plantkit) ![NPM License](https://img.shields.io/npm/l/plantkit)
 
-PlantKit is a comprehensive TypeScript library for generating [PlantUML](https://plantuml.com/) [ArchiMate](https://publications.opengroup.org/standards/archimate/specifications/c226) diagrams programmatically. It provides a complete toolkit for modeling enterprise architecture with full ArchiMate 3.x compliance and sophisticated diagram generation capabilities.
+PlantKit is a TypeScript library for generating [PlantUML](https://plantuml.com/) [ArchiMate](https://publications.opengroup.org/standards/archimate/specifications/c226) diagrams programmatically. It supports the ArchiMate 3.2 element and relationship vocabulary rendered through Archimate-PlantUML macros.
 
 ## Key Features
 
-* **🏗️ Complete ArchiMate 3.x Support**: All 65+ element types and 77+ relationship variants across all layers
+* **🏗️ ArchiMate 3.2 Vocabulary**: 65+ element types and 77+ relationship variants across all layers
 * **🌳 Dual Modeling Architecture**: Hierarchical element trees for visual organization + semantic relationship graphs
 * **🎨 Advanced Diagram Generation**: Automatic sprite management, legends, scaling, and layout control
 * **🔧 Enterprise-Ready**: Property management, validation, type safety, and production-quality PlantUML output
@@ -37,7 +37,7 @@ PlantKit supports all ArchiMate 3.x element types across all layers:
 * **Application Layer**: Component, Collaboration, Interface, Function, Interaction, Process, Event, Service, Data Object
 * **Technology Layer**: Node, Device, System Software, Collaboration, Interface, Path, Communication Network, Function, Process, Interaction, Event, Service, Artifact
 * **Physical Layer**: Equipment, Facility, Distribution Network, Material
-* **Motivation Layer**: Stakeholder, Driver, Assessment, Goal, Principle, Requirement, Constraint, Meaning, Value
+* **Motivation Layer**: Stakeholder, Driver, Assessment, Goal, Outcome, Principle, Requirement, Constraint, Meaning, Value
 * **Implementation Layer**: Work Package, Deliverable, Event, Plateau, Gap
 * **Other Elements**: Location, Junction (Or/And), Grouping, Group
 
@@ -290,6 +290,18 @@ PlantKit.toValidElementName('My Element'); // Generate valid IDs
 // Debug output
 plantkit.printNode(element);               // Print element tree
 plantkit.printArchimate(element);          // Print ArchiMate syntax
+```
+
+### Model Validation
+
+The facade validates registered ArchiMate types and generated PlantUML aliases. Call `validate()` to inspect model diagnostics before rendering; `generate()` rejects a model that has diagnostics.
+
+```typescript
+const kit = PlantKit.create('business-model', 'Business Model')
+  .addElement('customer', 'Business_Actor', 'Customer');
+
+const diagnostics = kit.validate(); // [] for a valid model
+const plantuml = kit.generate();
 ```
 
 ## Advanced Features

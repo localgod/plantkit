@@ -1,24 +1,18 @@
 {
-	"name": "Ona",
-	"build": {
-        "context": ".",
-        "dockerfile": "Dockerfile"
-    },
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker": {
-			"moby": false
-		},
-		"ghcr.io/devcontainers/features/node": {
-			"nodeGypDependencies": true,
-			"version": "lts",
-			"nvmVersion": "latest"
-		}
-	},
+	"name": "PlantKit",
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:latest",
+	"updateRemoteUserUID": true,
+	"postCreateCommand": "npm ci",
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"jebbs.plantuml",
-				"DavidAnson.vscode-markdownlint",
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"GitHub.vscode-github-actions",
+				"GitHub.vscode-pull-request-github",
+				"vitest.explorer",
+				"Anthropic.claude-code",
 				"usernamehw.errorlens"
 			]
 		}
