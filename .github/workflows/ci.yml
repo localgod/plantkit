@@ -51,6 +51,7 @@ jobs:
           npm run build
           npm run test:coverage
           npm run test:plantuml
+          npm run test:neutral
       - name: Vitest Coverage Report
         uses: davelosert/vitest-coverage-report-action@v2
         if: always()

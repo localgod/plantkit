@@ -84,6 +84,7 @@ The Gitpod environment includes:
 - **`npm run dev`** - Watch mode for development
 - **`npm test`** - Run tests with Vitest
 - **`npm run test:coverage`** - Run tests with coverage report
+- **`npm run test:neutral`** - Check that `./dist` is runtime-neutral (no `node:` or bare imports; runs without Node/DOM globals)
 - **`npm run test:plantuml`** - Render the generated smoke diagrams with PlantUML (needs `npm run build` and `./support.sh`)
 - **`npm run lint`** - Lint source code with Oxlint
 - **`npm run lint:fix`** - Auto-fix linting issues
