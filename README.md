@@ -6,12 +6,12 @@ PlantKit is a TypeScript library for generating [PlantUML](https://plantuml.com/
 
 ## Key Features
 
-* **🏗️ ArchiMate 3.2 Vocabulary**: 65+ element types and 77+ relationship variants across all layers
-* **🌳 Dual Modeling Architecture**: Hierarchical element trees for visual organization + semantic relationship graphs
-* **🎨 Advanced Diagram Generation**: Automatic sprite management, legends, scaling, and layout control
-* **🔧 Enterprise-Ready**: Property management, validation, type safety, and production-quality PlantUML output
-* **📝 TypeScript Native**: Full type safety with comprehensive type definitions
-* **🚀 Developer Friendly**: Intuitive API with utility functions and debugging support
+- **🏗️ ArchiMate 3.2 Vocabulary**: 65+ element types and 77+ relationship variants across all layers
+- **🌳 Dual Modeling Architecture**: Hierarchical element trees for visual organization + semantic relationship graphs
+- **🎨 Advanced Diagram Generation**: Automatic sprite management, legends, scaling, and layout control
+- **🔧 Enterprise-Ready**: Property management, validation, type safety, and production-quality PlantUML output
+- **📝 TypeScript Native**: Full type safety with comprehensive type definitions
+- **🚀 Developer Friendly**: Intuitive API with utility functions and debugging support
 
 ## Architecture Overview
 
@@ -19,12 +19,12 @@ PlantKit uses a dual modeling approach that separates visual presentation from s
 
 ### Core Components
 
-* **`Element`** - Hierarchical tree structures for visual grouping and nesting
-* **`ElementGraph`** - Semantic relationships between elements (composition, flow, etc.)
-* **`Diagram`** - PlantUML generation with sprites, legends, and formatting
-* **`PlantKit`** - Conversion utilities and output generation
-* **`ArchimateElement`** - Type-safe ArchiMate element creation
-* **`ArchimateRelation`** - Type-safe ArchiMate relationship creation
+- **`Element`** - Hierarchical tree structures for visual grouping and nesting
+- **`ElementGraph`** - Semantic relationships between elements (composition, flow, etc.)
+- **`Diagram`** - PlantUML generation with sprites, legends, and formatting
+- **`PlantKit`** - Conversion utilities and output generation
+- **`ArchimateElement`** - Type-safe ArchiMate element creation
+- **`ArchimateRelation`** - Type-safe ArchiMate relationship creation
 
 ## ArchiMate Support
 
@@ -32,23 +32,23 @@ PlantKit uses a dual modeling approach that separates visual presentation from s
 
 PlantKit supports all ArchiMate 3.x element types across all layers:
 
-* **Strategy Layer**: Resource, Capability, Course of Action, Value Stream
-* **Business Layer**: Actor, Role, Collaboration, Interface, Process, Function, Interaction, Event, Service, Object, Contract, Representation, Product, Location
-* **Application Layer**: Component, Collaboration, Interface, Function, Interaction, Process, Event, Service, Data Object
-* **Technology Layer**: Node, Device, System Software, Collaboration, Interface, Path, Communication Network, Function, Process, Interaction, Event, Service, Artifact
-* **Physical Layer**: Equipment, Facility, Distribution Network, Material
-* **Motivation Layer**: Stakeholder, Driver, Assessment, Goal, Outcome, Principle, Requirement, Constraint, Meaning, Value
-* **Implementation Layer**: Work Package, Deliverable, Event, Plateau, Gap
-* **Other Elements**: Location, Junction (Or/And), Grouping, Group
+- **Strategy Layer**: Resource, Capability, Course of Action, Value Stream
+- **Business Layer**: Actor, Role, Collaboration, Interface, Process, Function, Interaction, Event, Service, Object, Contract, Representation, Product, Location
+- **Application Layer**: Component, Collaboration, Interface, Function, Interaction, Process, Event, Service, Data Object
+- **Technology Layer**: Node, Device, System Software, Collaboration, Interface, Path, Communication Network, Function, Process, Interaction, Event, Service, Artifact
+- **Physical Layer**: Equipment, Facility, Distribution Network, Material
+- **Motivation Layer**: Stakeholder, Driver, Assessment, Goal, Outcome, Principle, Requirement, Constraint, Meaning, Value
+- **Implementation Layer**: Work Package, Deliverable, Event, Plateau, Gap
+- **Other Elements**: Location, Junction (Or/And), Grouping, Group
 
 ### Relationship Types (77+ supported)
 
 Complete support for all ArchiMate relationships with directional variants:
 
-* **Structural**: Composition, Aggregation, Assignment, Specialization
-* **Dependency**: Serving, Association, Flow, Realization, Triggering
-* **Dynamic**: Access (read/write/read-write variants), Influence
-* **Directional Variants**: Up, Down, Left, Right for all relationship types
+- **Structural**: Composition, Aggregation, Assignment, Specialization
+- **Dependency**: Serving, Association, Flow, Realization, Triggering
+- **Dynamic**: Access (read/write/read-write variants), Influence
+- **Directional Variants**: Up, Down, Left, Right for all relationship types
 
 ## Installation
 
@@ -81,14 +81,14 @@ For complex scenarios requiring hierarchies or advanced features:
 import { Element, ElementGraph, Diagram, PlantKit } from 'plantkit';
 
 // Create elements with properties
-const customer = new Element('Customer', { 
-  type: 'Business_Actor', 
-  label: 'Customer' 
+const customer = new Element('Customer', {
+  type: 'Business_Actor',
+  label: 'Customer',
 });
 
-const orderProcess = new Element('Order Process', { 
-  type: 'Business_Process', 
-  label: 'Order Processing' 
+const orderProcess = new Element('Order Process', {
+  type: 'Business_Process',
+  label: 'Order Processing',
 });
 
 // Create element graph for relationships
@@ -121,9 +121,9 @@ PlantKit uses a **dual modeling approach**:
 
 This separation allows you to:
 
-* Organize elements visually (e.g., group related components)
-* Define semantic relationships independently (e.g., data flows, dependencies)
-* Generate clean, readable diagrams with proper ArchiMate semantics
+- Organize elements visually (e.g., group related components)
+- Define semantic relationships independently (e.g., data flows, dependencies)
+- Generate clean, readable diagrams with proper ArchiMate semantics
 
 ### Properties and Metadata
 
@@ -134,12 +134,12 @@ const element = new Element('Database', {
   type: 'Technology_Node',
   label: 'Customer Database',
   technology: 'PostgreSQL',
-  version: '14.0'
+  version: '14.0',
 });
 
 graph.addRelation(app, database, 'Rel_Access_rw', {
   label: 'reads/writes',
-  protocol: 'JDBC'
+  protocol: 'JDBC',
 });
 ```
 
@@ -202,13 +202,13 @@ const output = PlantKit.create('architecture', 'System Architecture')
 const kit = PlantKit.create('hierarchy', 'Business Capabilities');
 
 // Add elements
-kit.addElement('business', 'Grouping', 'Business Layer')
-   .addElement('marketing', 'Strategy_Capability', 'Marketing')
-   .addElement('sales', 'Strategy_Capability', 'Sales');
+kit
+  .addElement('business', 'Grouping', 'Business Layer')
+  .addElement('marketing', 'Strategy_Capability', 'Marketing')
+  .addElement('sales', 'Strategy_Capability', 'Sales');
 
 // Nest elements (chainable). Each element is written once, inside its parent.
-kit.addChild('business', 'marketing')
-   .addChild('business', 'sales');
+kit.addChild('business', 'marketing').addChild('business', 'sales');
 
 const output = kit.generate();
 ```
@@ -221,8 +221,7 @@ const output = kit.generate();
 const kit = PlantKit.create('custom', 'Custom Diagram');
 
 // Use fluent API
-kit.addElement('e1', 'Business_Actor', 'Actor')
-   .addElement('e2', 'Business_Process', 'Process');
+kit.addElement('e1', 'Business_Actor', 'Actor').addElement('e2', 'Business_Process', 'Process');
 
 // Access diagram for advanced features
 kit.diagram.setLayout('top to bottom direction');
@@ -242,9 +241,9 @@ const child = new Element('Module', { type: 'Application_Component' });
 parent.addChild(child);
 
 // Navigate and query
-parent.getChildren();           // Get all children
-parent.findElement('Module');   // Find by name recursively
-parent.removeChild('Module');   // Remove child by name
+parent.getChildren(); // Get all children
+parent.findElement('Module'); // Find by name recursively
+parent.removeChild('Module'); // Remove child by name
 ```
 
 ### ElementGraph Class
@@ -257,9 +256,9 @@ graph.addNode(elementB);
 graph.addRelation(elementA, elementB, 'Rel_Flow', { label: 'data' });
 
 // Query relationships
-graph.getOutgoingRelations(elementA);  // Get outgoing relations
-graph.getIncomingRelations(elementB);  // Get incoming relations
-graph.getConnectedNodes(elementA);     // Get all connected nodes
+graph.getOutgoingRelations(elementA); // Get outgoing relations
+graph.getIncomingRelations(elementB); // Get incoming relations
+graph.getConnectedNodes(elementA); // Get all connected nodes
 ```
 
 ### Diagram Class
@@ -285,14 +284,14 @@ const plantuml = diagram.output();
 const plantkit = new PlantKit();
 
 // Convert elements to ArchiMate syntax
-plantkit.toArchimate(element);              // Element tree to PlantUML
-plantkit.toArchimateRelations(graph);      // Relations to PlantUML
+plantkit.toArchimate(element); // Element tree to PlantUML
+plantkit.toArchimateRelations(graph); // Relations to PlantUML
 PlantKit.toValidElementName('My Element'); // 'ID_My_x20Element'
-PlantKit.aliasOf(element);                 // alias property, or the derived alias
+PlantKit.aliasOf(element); // alias property, or the derived alias
 
 // Debug output
-plantkit.printNode(element);               // Print element tree
-plantkit.printArchimate(element);          // Print ArchiMate syntax
+plantkit.printNode(element); // Print element tree
+plantkit.printArchimate(element); // Print ArchiMate syntax
 ```
 
 ### Model Validation
@@ -300,8 +299,11 @@ plantkit.printArchimate(element);          // Print ArchiMate syntax
 The facade validates registered ArchiMate types and generated PlantUML aliases. Call `validate()` to inspect model diagnostics before rendering; `generate()` rejects a model that has diagnostics.
 
 ```typescript
-const kit = PlantKit.create('business-model', 'Business Model')
-  .addElement('customer', 'Business_Actor', 'Customer');
+const kit = PlantKit.create('business-model', 'Business Model').addElement(
+  'customer',
+  'Business_Actor',
+  'Customer',
+);
 
 const diagnostics = kit.validate(); // [] for a valid model
 const plantuml = kit.generate();
@@ -324,16 +326,21 @@ The text is escaped the same way as labels. A note without `attachTo` stands alo
 
 `generate()` output renders on its own: the facade writes `!include <archimate/Archimate>` (the Archimate-PlantUML library bundled with PlantUML) before any include you add. Pass options to `create()` or `setOptions()`:
 
-| Option | Default | Effect |
-| --- | --- | --- |
-| `include` | `true` | Write `!include <archimate/Archimate>`. Turn it off when you include your own copy or theme with `addInclude()`. |
-| `sprites` | `true` | Write a `sprite` line for each element and relationship type in use. Without sprites there is no legend. |
-| `legend` | `true` | Write a legend of the sprites. It is left out when there are no sprites. |
-| `scale` | `1` | The `scale` line; `null` leaves it out. |
-| `layout` | `'left to right direction'` | The layout line; `null` leaves it out. |
+| Option    | Default                     | Effect                                                                                                           |
+| --------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `include` | `true`                      | Write `!include <archimate/Archimate>`. Turn it off when you include your own copy or theme with `addInclude()`. |
+| `sprites` | `true`                      | Write a `sprite` line for each element and relationship type in use. Without sprites there is no legend.         |
+| `legend`  | `true`                      | Write a legend of the sprites. It is left out when there are no sprites.                                         |
+| `scale`   | `1`                         | The `scale` line; `null` leaves it out.                                                                          |
+| `layout`  | `'left to right direction'` | The layout line; `null` leaves it out.                                                                           |
 
 ```typescript
-PlantKit.create('view', 'Layered View', { legend: false, sprites: false, layout: null, scale: null })
+PlantKit.create('view', 'Layered View', {
+  legend: false,
+  sprites: false,
+  layout: null,
+  scale: null,
+})
   .addElement('customer', 'Business_Actor', 'Customer')
   .generate();
 // @startuml view
@@ -380,18 +387,14 @@ diagram.autosprite('Rel_Realization');
 
 ```typescript
 // Type-safe element creation
-const element = ArchimateElement(
-  ArchimateElement.type.Business_Actor, 
-  'CUST_001', 
-  'Customer'
-);
+const element = ArchimateElement(ArchimateElement.type.Business_Actor, 'CUST_001', 'Customer');
 
 // Type-safe relationship creation
 const relation = ArchimateRelation(
   ArchimateRelation.type.Rel_Flow_Down,
   'SRC_001',
   'TGT_001',
-  'data flow'
+  'data flow',
 );
 ```
 
@@ -411,8 +414,8 @@ try {
 
 Comprehensive example files demonstrate real-world usage:
 
-* **[sample01.mts](./examples/sample01.mts)** - Complete business capability model with multiple layers and relationships
-* **[sample02.mts](./examples/sample02.mts)** - CSV data import and process modeling example
+- **[sample01.mts](./examples/sample01.mts)** - Complete business capability model with multiple layers and relationships
+- **[sample02.mts](./examples/sample02.mts)** - CSV data import and process modeling example
 
 You will need to run the `support.sh` script to have the relevant tools ready to check the output.
 
@@ -430,21 +433,21 @@ npm run build
 
 PlantKit is ideal for:
 
-* **Enterprise Architecture Documentation** - Model business, application, and technology layers
-* **System Integration Planning** - Visualize data flows and dependencies  
-* **Business Process Modeling** - Document workflows and stakeholder interactions
-* **Technology Roadmaps** - Plan implementation phases and deliverables
-* **Automated Documentation** - Generate diagrams from data sources (databases, APIs, etc.)
+- **Enterprise Architecture Documentation** - Model business, application, and technology layers
+- **System Integration Planning** - Visualize data flows and dependencies
+- **Business Process Modeling** - Document workflows and stakeholder interactions
+- **Technology Roadmaps** - Plan implementation phases and deliverables
+- **Automated Documentation** - Generate diagrams from data sources (databases, APIs, etc.)
 
 ## Output Quality
 
 PlantKit generates production-ready PlantUML with:
 
-* ✅ **Proper ArchiMate Syntax** - Compliant with ArchiMate 3.x specifications
-* ✅ **Clean Formatting** - Readable, well-structured PlantUML code
-* ✅ **Sprite Integration** - Automatic icon management and legends
-* ✅ **Scalable Output** - Configurable sizing and layout options
-* ✅ **Include Support** - Integration with external PlantUML themes and libraries
+- ✅ **Proper ArchiMate Syntax** - Compliant with ArchiMate 3.x specifications
+- ✅ **Clean Formatting** - Readable, well-structured PlantUML code
+- ✅ **Sprite Integration** - Automatic icon management and legends
+- ✅ **Scalable Output** - Configurable sizing and layout options
+- ✅ **Include Support** - Integration with external PlantUML themes and libraries
 
 ## Runtimes
 
@@ -458,10 +461,10 @@ CI keeps it this way: `npm run test:neutral` bundles `dist/index.mjs` for `platf
 
 Full TypeScript support with:
 
-* Complete type definitions for all classes and functions
-* IntelliSense support in modern IDEs
-* Compile-time validation of ArchiMate element and relationship types
-* Generic type support for properties and metadata
+- Complete type definitions for all classes and functions
+- IntelliSense support in modern IDEs
+- Compile-time validation of ArchiMate element and relationship types
+- Generic type support for properties and metadata
 
 ## Contributing
 
@@ -469,16 +472,16 @@ We welcome contributions to PlantKit! Whether you're fixing bugs, adding feature
 
 Please read our [Contributing Guide](CONTRIBUTING.md) for details on:
 
-* Development setup and workflow
-* Coding standards and best practices
-* Testing requirements
-* Pull request process
+- Development setup and workflow
+- Coding standards and best practices
+- Testing requirements
+- Pull request process
 
 **Quick Links:**
 
-* [Report a Bug](https://github.com/localgod/plantkit/issues/new?template=bug_report.md)
-* [Request a Feature](https://github.com/localgod/plantkit/issues/new?template=feature_request.md)
-* [View Open Issues](https://github.com/localgod/plantkit/issues)
+- [Report a Bug](https://github.com/localgod/plantkit/issues/new?template=bug_report.md)
+- [Request a Feature](https://github.com/localgod/plantkit/issues/new?template=feature_request.md)
+- [View Open Issues](https://github.com/localgod/plantkit/issues)
 
 ## License
 

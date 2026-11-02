@@ -22,8 +22,7 @@ None
 
 ## Checklist
 
-- [ ] `npm run build` and `npm run check` (format, lint, type check) pass
+- [ ] `npm run build` and `npm run check` (format incl. Markdown, lint, type check) pass
 - [ ] `npm test` passes, with new or updated tests for this change
 - [ ] Generated output renders: `npm run test:plantuml` passes (needs `./support.sh`)
-- [ ] `npm run mdlint` passes
 - [ ] README.md / CONTRIBUTING.md updated, if behaviour or commands changed
