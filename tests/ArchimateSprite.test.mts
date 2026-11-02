@@ -23,4 +23,10 @@ describe('ArchimateSprite', () => {
       expect(sprite.label).not.toBe('');
     }
   });
+
+  it('uses the sprite names PlantUML ships for groupings and distribution networks', () => {
+    expect(getArchimateSprite('Grouping').path).toBe('other-grouping');
+    expect(getArchimateSprite('Group').path).toBe('other-grouping');
+    expect(getArchimateSprite('Physical_DistributionNetwork').path).toBe('technology-distribution-network');
+  });
 });

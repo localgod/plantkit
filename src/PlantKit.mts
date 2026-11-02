@@ -2,7 +2,18 @@ import { Element } from './Element.mjs';
 import { ArchimateElement, canContainElements, isArchimateElementType, type ArchimateElementType } from './archimate/ArchimateElement.mjs';
 import { ArchimateRelation, isArchimateRelationType, type ArchimateRelationType } from './archimate/ArchimateRelation.mjs';
 import { ElementGraph } from './ElementGraph.mjs';
-import { Diagram } from './Diagram.mjs';
+import { Diagram, type DiagramOptions } from './Diagram.mjs';
+
+/** The Archimate-PlantUML standard library include written by the facade by default. */
+export const ARCHIMATE_STDLIB_INCLUDE = '<archimate/Archimate>';
+
+export interface PlantKitOptions extends DiagramOptions {
+    /**
+     * Write `!include <archimate/Archimate>` (default true). Turn it off when
+     * you include your own copy or theme with `addInclude()`.
+     */
+    include?: boolean;
+}
 
 export interface ValidationDiagnostic {
     code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'ELEMENT_HIERARCHY_CYCLE' | 'ELEMENT_MULTIPLE_PARENTS' | 'ELEMENT_CANNOT_CONTAIN' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
@@ -15,16 +26,17 @@ class PlantKit {
     private elements?: Map<string, Element>;
     private readonly aliases = new Map<string, string>();
 
-    constructor(name?: string, title?: string) {
-        if (name && title) {
-            this.diagramInstance = new Diagram(name, title);
+    constructor(name?: string, title?: string, options: PlantKitOptions = {}) {
+        if (name !== undefined && title !== undefined) {
+            this.diagramInstance = new Diagram(name, title, options);
+            this.diagramInstance.setLibraryInclude(options.include === false ? null : ARCHIMATE_STDLIB_INCLUDE);
             this.graphInstance = new ElementGraph();
             this.elements = new Map();
         }
     }
 
-    public static create(name: string, title: string): PlantKit {
-        return new PlantKit(name, title);
+    public static create(name: string, title: string, options: PlantKitOptions = {}): PlantKit {
+        return new PlantKit(name, title, options);
     }
 
     public addElement(
@@ -109,7 +121,8 @@ class PlantKit {
         return this;
     }
 
-    public setScale(scale: number): this {
+    /** `null` omits the `scale` line. */
+    public setScale(scale: number | null): this {
         if (!this.diagramInstance) {
             throw new Error('PlantKit must be created with create() method to use facade API');
         }
@@ -117,11 +130,24 @@ class PlantKit {
         return this;
     }
 
-    public setLayout(layout: string): this {
+    /** `null` omits the layout line. */
+    public setLayout(layout: string | null): this {
         if (!this.diagramInstance) {
             throw new Error('PlantKit must be created with create() method to use facade API');
         }
         this.diagramInstance.setLayout(layout);
+        return this;
+    }
+
+    /** Changes output options after creation; see `PlantKitOptions`. */
+    public setOptions(options: PlantKitOptions): this {
+        if (!this.diagramInstance) {
+            throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+        this.diagramInstance.setOptions(options);
+        if (options.include !== undefined) {
+            this.diagramInstance.setLibraryInclude(options.include ? ARCHIMATE_STDLIB_INCLUDE : null);
+        }
         return this;
     }
 

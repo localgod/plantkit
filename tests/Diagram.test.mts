@@ -106,3 +106,49 @@ describe('Diagram', () => {
         expect(layoutIndex).toBeGreaterThan(scaleIndex);
     });
 });
+
+describe('Diagram output options (#244)', () => {
+    it('writes no legend block when there are no sprites', () => {
+        const output = new Diagram('v', 'V').output();
+        expect(output).not.toContain('legend');
+        expect(output).not.toContain('====');
+    });
+
+    it('omits scale and layout when set to null', () => {
+        const output = new Diagram('v', 'V', { scale: null, layout: null }).output();
+        expect(output).not.toMatch(/^scale/m);
+        expect(output).not.toContain('direction');
+    });
+
+    it('can turn the legend off but keep sprite declarations', () => {
+        const diagram = new Diagram('v', 'V', { legend: false });
+        diagram.autosprite('Business_Actor');
+        const output = diagram.output();
+        expect(output).toContain('sprite $Business_Actor_Sprite');
+        expect(output).not.toContain('legend');
+    });
+
+    it('turning sprites off also drops the legend', () => {
+        const diagram = new Diagram('v', 'V', { sprites: false });
+        diagram.autosprite('Business_Actor');
+        const output = diagram.output();
+        expect(output).not.toContain('sprite ');
+        expect(output).not.toContain('legend');
+    });
+
+    it('writes no blank lines for empty body content', () => {
+        const diagram = new Diagram('v', 'V', { scale: null, layout: null });
+        diagram.setGeneratedBody(['A', '', 'B']);
+        expect(diagram.output()).toBe('@startuml v\ntitle V\nA\nB\n@enduml');
+    });
+
+    it('writes the library include first and only once', () => {
+        const diagram = new Diagram('v', 'V');
+        diagram.addInclude('theme.puml');
+        diagram.addInclude('<archimate/Archimate>');
+        diagram.addInclude('theme.puml');
+        diagram.setLibraryInclude('<archimate/Archimate>');
+        const includes = diagram.output().split('\n').filter(line => line.startsWith('!include'));
+        expect(includes).toEqual(['!include <archimate/Archimate>', '!include theme.puml']);
+    });
+});
