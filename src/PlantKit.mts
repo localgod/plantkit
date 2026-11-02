@@ -5,7 +5,7 @@ import { ElementGraph } from './ElementGraph.mjs';
 import { Diagram } from './Diagram.mjs';
 
 export interface ValidationDiagnostic {
-    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
+    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'ELEMENT_HIERARCHY_CYCLE' | 'ELEMENT_MULTIPLE_PARENTS' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
     message: string;
 }
 
@@ -77,6 +77,31 @@ class PlantKit {
         }
 
         this.graphInstance.addRelation(source, target, type, label ? { label } : undefined);
+        return this;
+    }
+
+    /**
+     * Nests the element `childId` inside `parentId`. An element can have only
+     * one parent, and the hierarchy cannot contain cycles.
+     */
+    public addChild(parentId: string, childId: string): this {
+        if (!this.elements) {
+            throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+        const parent = this.elements.get(parentId);
+        const child = this.elements.get(childId);
+        if (!parent || !child) {
+            throw new Error(`Element not found: ${!parent ? parentId : childId}`);
+        }
+        if (PlantKit.contains(child, parent)) {
+            throw new Error(`Cannot nest ${childId} inside ${parentId}: it would create a cycle`);
+        }
+        for (const element of this.elements.values()) {
+            if (element.getChildren().includes(child)) {
+                throw new Error(`Element ${childId} already has a parent: ${element.getName()}`);
+            }
+        }
+        parent.addChild(child);
         return this;
     }
 
@@ -184,6 +209,8 @@ class PlantKit {
             }
         });
 
+        diagnostics.push(...PlantKit.hierarchyDiagnostics(Array.from(this.elements.values())));
+
         this.graphInstance.getRelations().forEach(relation => {
             if (!isArchimateRelationType(relation.type)) {
                 diagnostics.push({
@@ -213,7 +240,7 @@ class PlantKit {
         this.autoSprites();
 
         const body: string[] = [];
-        this.elements.forEach(element => {
+        PlantKit.roots(Array.from(this.elements.values())).forEach(element => {
             body.push(this.toArchimate(element));
         });
 
@@ -221,6 +248,66 @@ class PlantKit {
         this.diagramInstance.setGeneratedBody(body);
 
         return this.diagramInstance.output();
+    }
+
+    /** Whether `target` is `root` or one of its descendants (compared by identity). */
+    private static contains(root: Element, target: Element, seen = new Set<Element>()): boolean {
+        if (root === target) {
+            return true;
+        }
+        if (seen.has(root)) {
+            return false;
+        }
+        seen.add(root);
+        return root.getChildren().some(child => PlantKit.contains(child, target, seen));
+    }
+
+    /** The elements that are not a descendant of any other element in `elements`. */
+    public static roots(elements: Element[]): Element[] {
+        const descendants = new Set<Element>();
+        const visit = (element: Element): void => {
+            for (const child of element.getChildren()) {
+                if (!descendants.has(child)) {
+                    descendants.add(child);
+                    visit(child);
+                }
+            }
+        };
+        elements.forEach(visit);
+        return elements.filter(element => !descendants.has(element));
+    }
+
+    private static hierarchyDiagnostics(elements: Element[]): ValidationDiagnostic[] {
+        const diagnostics: ValidationDiagnostic[] = [];
+        const parents = new Map<Element, Element>();
+        const reported = new Set<Element>();
+        const visit = (element: Element, ancestors: Element[]): void => {
+            for (const child of element.getChildren()) {
+                if (ancestors.includes(child) || child === element) {
+                    if (!reported.has(child)) {
+                        reported.add(child);
+                        diagnostics.push({
+                            code: 'ELEMENT_HIERARCHY_CYCLE',
+                            message: `Element ${child.getName()} is nested inside itself`,
+                        });
+                    }
+                    continue;
+                }
+                const parent = parents.get(child);
+                if (parent === undefined) {
+                    parents.set(child, element);
+                    visit(child, [...ancestors, element]);
+                } else if (parent !== element && !reported.has(child)) {
+                    reported.add(child);
+                    diagnostics.push({
+                        code: 'ELEMENT_MULTIPLE_PARENTS',
+                        message: `Element ${child.getName()} has more than one parent: ${parent.getName()}, ${element.getName()}`,
+                    });
+                }
+            }
+        };
+        elements.forEach(element => visit(element, []));
+        return diagnostics;
     }
 
     public get diagram(): Diagram {
@@ -349,6 +436,14 @@ class PlantKit {
     }
 
     public toArchimate(node: Element, out: string[] = [], indent = 0): string {
+        this.writeArchimate(node, out, indent, new Set());
+        return out.join('\n');
+    }
+
+    private writeArchimate(node: Element, out: string[], indent: number, ancestors: Set<Element>): void {
+        if (ancestors.has(node)) {
+            throw new Error(`Element ${node.getName()} is nested inside itself`);
+        }
         const children = node.getChildren();
         const name = PlantKit.aliasOf(node);
         const properties = node.getProperties();
@@ -366,14 +461,15 @@ class PlantKit {
 
         if (children.length > 0) {
             out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label) + ' {');
-            for (const child of node.getChildren()) {
-                this.toArchimate(child, out, indent + 1);
+            ancestors.add(node);
+            for (const child of children) {
+                this.writeArchimate(child, out, indent + 1, ancestors);
             }
+            ancestors.delete(node);
             out.push('  '.repeat(indent) + '}')
         } else {
             out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label));
         }
-        return out.join('\n');
     }
 
     public printArchimateRelations(elementGraph: ElementGraph, indent = 0): void {
