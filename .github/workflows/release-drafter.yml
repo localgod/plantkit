@@ -1,22 +1,29 @@
 name: 🚀 Release Drafter
 run-name: 🚀 Release Drafter
+# Changes are categorised from conventional-commit pull request titles
+# (see .github/release-drafter.yml), so no pull request trigger or
+# autolabeler is needed: the draft is updated when changes reach main.
 on:
   workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, reopened, synchronize]
+
 permissions:
   contents: read
 
+concurrency:
+  group: release-drafter
+  cancel-in-progress: false
+
 jobs:
   update_release_draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       contents: write
-      pull-requests: write
-    runs-on: ubuntu-latest
+      pull-requests: read
     steps:
-      - uses: release-drafter/release-drafter@v7
+      - uses: release-drafter/release-drafter@978bb0b30c5ee8cdd332ced253758157150d43f0 # v7.10.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

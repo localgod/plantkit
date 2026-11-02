@@ -1,4 +1,5 @@
 version: 2
+# Review requests come from .github/CODEOWNERS (the `reviewers` option is deprecated).
 updates:
   - package-ecosystem: npm
     directory: '/'
@@ -6,25 +7,41 @@ updates:
       interval: weekly
       time: '00:00'
     open-pull-requests-limit: 10
-    reviewers:
-      - localgod
     assignees:
       - localgod
     commit-message:
       prefix: fix
       prefix-development: chore
       include: scope
+    ignore:
+      # Vite+ pins these to each other (the `vitest` pin and the `vite`
+      # override in package.json must match the vite-plus release), and
+      # Dependabot updates packages one at a time without touching
+      # `overrides`. Upgrade them together with `npx vp migrate` instead;
+      # see https://viteplus.dev/guide/upgrade-project.
+      - dependency-name: 'vite-plus'
+      - dependency-name: 'vitest'
+      - dependency-name: '@vitest/*'
+    groups:
+      # One pull request for routine dev-dependency updates.
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
       interval: weekly
       time: '00:00'
     open-pull-requests-limit: 10
-    reviewers:
-      - localgod
     assignees:
       - localgod
     commit-message:
-      prefix: fix
-      prefix-development: chore
+      prefix: ci
       include: scope
+    groups:
+      github-actions:
+        update-types:
+          - minor
+          - patch

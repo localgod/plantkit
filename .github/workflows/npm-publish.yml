@@ -6,29 +6,54 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
 
 jobs:
-  build:
+  version:
+    name: Check release tag
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npm run test
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Release tag must match package.json version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "${RELEASE_TAG#v}" != "$version" ]; then
+            echo "::error::Release tag ${RELEASE_TAG} does not match package.json version ${version}"
+            exit 1
+          fi
+          echo "Publishing ${version}"
+
+  # The same checks as every push and pull request: format, lint, type check,
+  # tests, PlantUML rendering and the runtime-neutral bundle check.
+  ci:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      pull-requests: write
 
   publish-npm:
-    needs: build
+    needs: [version, ci]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # npm trusted publishing (OIDC) and provenance; no npm token is used.
+      id-token: write
+    env:
+      VP_GIT_HOOKS: '0'
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
       - run: npm ci
-      - run: npm run prebuild
+      # `npm run build` runs `prebuild` (regenerates src/index.mts) first.
       - run: npm run build
       - run: npm publish

@@ -134,7 +134,7 @@ git commit -m "feat: add support for new ArchiMate element type"
 
 ### Commit Message Guidelines
 
-We follow conventional commit format:
+We follow conventional commit format, for commit messages **and pull request titles**:
 
 - **`feat:`** - New feature
 - **`fix:`** - Bug fix
@@ -142,7 +142,12 @@ We follow conventional commit format:
 - **`test:`** - Adding or updating tests
 - **`refactor:`** - Code refactoring
 - **`chore:`** - Maintenance tasks
+- **`ci:`** / **`build:`** - CI workflows and build tooling
 - **`style:`** - Code style changes (formatting, etc.)
+
+Add `!` after the type for a breaking change, such as a change to generated PlantUML or the public API that existing users would notice: `feat!: ...`, `fix!: ...`.
+
+Release notes are drafted from pull request titles (see [Releases](#releases)), so the title decides where a change appears and how the version moves.
 
 Examples:
 
@@ -164,10 +169,8 @@ test: add coverage for edge cases in PlantKit.toValidElementName
 
 ### Code Style
 
-- **Indentation:** 4 spaces (configured in project)
-- **Quotes:** Single quotes for strings
-- **Semicolons:** Not required (project uses ASI)
-- **Line length:** Keep reasonable (Oxlint configured)
+Formatting is enforced by Oxfmt (`npm run fmt`; configured in `vite.config.ts`: single quotes) and checked by `npm run check` and the pre-commit hook. Don't format by hand.
+
 - Follow existing patterns in the codebase
 
 ### File Organization
@@ -337,8 +340,8 @@ What should happen
 What actually happens
 
 **Environment:**
-- PlantKit version: 1.0.4
-- Node.js version: 22.20.0
+- PlantKit version: 1.1.0
+- Node.js version: 24.21.0
 - OS: Ubuntu 24.04
 
 **Code Sample:**
@@ -393,6 +396,24 @@ If you have questions about contributing:
 2. Search [closed issues](https://github.com/localgod/plantkit/issues?q=is%3Aissue+is%3Aclosed)
 3. Open a [discussion](https://github.com/localgod/plantkit/discussions)
 4. Create an [issue](https://github.com/localgod/plantkit/issues/new)
+
+## Releases
+
+- Release Drafter keeps a draft release up to date as pull requests merge into `main`. It sorts each change by its conventional-commit title and picks the next version: a breaking change (`!`) is a major bump, `feat:` is minor, everything else is a patch. Tags have no `v` prefix (`1.1.0`).
+- To release: set `version` in `package.json` to the drafted version and merge that change, then publish the draft release.
+- Publishing the release runs `.github/workflows/npm-publish.yml`. It checks that the tag matches `package.json`, runs the full CI workflow, then publishes to npm with trusted publishing (no npm token) and provenance.
+
+## Dependency Updates
+
+Dependabot opens weekly pull requests: one grouped pull request for minor and patch dev-dependency updates, and one for GitHub Actions. It skips `vite-plus`, `vitest` and `@vitest/*`, because Vite+ needs them (and the `vite` override in `package.json`) at matching versions. Upgrade those together:
+
+```bash
+npx vp migrate --no-interactive
+npm install
+npm run build && npm run check && npm test
+```
+
+See [Update Vite+](https://viteplus.dev/guide/upgrade-project) for details.
 
 ## Recognition
 
