@@ -159,7 +159,10 @@ kit.addElement(id, type, label, properties?);
 // Add relationships (chainable)
 kit.addRelation(fromId, toId, relationType, label?);
 
-// Get element for hierarchies or advanced manipulation
+// Nest an element inside another (chainable)
+kit.addChild(parentId, childId);
+
+// Get element for advanced manipulation
 const element = kit.getElement(id);
 
 // Configure diagram (chainable)
@@ -199,18 +202,14 @@ kit.addElement('business', 'Grouping', 'Business Layer')
    .addElement('marketing', 'Strategy_Capability', 'Marketing')
    .addElement('sales', 'Strategy_Capability', 'Sales');
 
-// Build hierarchy using getElement
-const parent = kit.getElement('business');
-const marketing = kit.getElement('marketing');
-const sales = kit.getElement('sales');
-
-if (parent && marketing && sales) {
-  parent.addChild(marketing);
-  parent.addChild(sales);
-}
+// Nest elements (chainable). Each element is written once, inside its parent.
+kit.addChild('business', 'marketing')
+   .addChild('business', 'sales');
 
 const output = kit.generate();
 ```
+
+`addChild` rejects unknown ids, cycles and a second parent. Children attached directly with `kit.getElement(id).addChild(...)` are also written only inside their parent, and `validate()` reports cycles (`ELEMENT_HIERARCHY_CYCLE`) and elements with two parents (`ELEMENT_MULTIPLE_PARENTS`).
 
 **Example - Advanced Configuration:**
 

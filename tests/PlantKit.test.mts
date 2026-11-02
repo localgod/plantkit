@@ -490,3 +490,80 @@ describe('printNode', () => {
     expect(consoleSpy).toHaveBeenNthCalledWith(3, '  Child Node 2');
   });
 });
+
+describe('Hierarchies (#241)', () => {
+  const kit = () => PlantKit.create('n', 'N')
+    .addElement('p', 'Grouping', 'P')
+    .addElement('c', 'Business_Actor', 'C')
+    .addElement('g', 'Business_Role', 'G');
+
+  it('emits a child attached through getElement().addChild() only once', () => {
+    const k = kit();
+    k.getElement('p')!.addChild(k.getElement('c')!);
+    const output = k.generate();
+
+    expect(output.match(/Business_Actor\("ID_c", "C"\)/g)).toHaveLength(1);
+    expect(output).toContain('Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C")\n}');
+  });
+
+  it('emits deeper descendants once, inside their parents', () => {
+    const output = kit().addChild('p', 'c').addChild('c', 'g').generate();
+
+    expect(output.match(/Business_Role\("ID_g", "G"\)/g)).toHaveLength(1);
+    expect(output.match(/Business_Actor\("ID_c", "C"\)/g)).toHaveLength(1);
+    expect(output).toContain('Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C") {\n    Business_Role("ID_g", "G")\n  }\n}');
+  });
+
+  it('keeps top-level elements in registration order', () => {
+    const output = kit().addChild('p', 'g').generate();
+
+    expect(output.indexOf('Grouping("ID_p"')).toBeLessThan(output.indexOf('Business_Actor("ID_c"'));
+  });
+
+  it('addChild rejects unknown ids', () => {
+    expect(() => kit().addChild('p', 'nope')).toThrow('Element not found: nope');
+    expect(() => kit().addChild('nope', 'c')).toThrow('Element not found: nope');
+  });
+
+  it('addChild rejects cycles', () => {
+    const k = kit().addChild('p', 'c').addChild('c', 'g');
+
+    expect(() => k.addChild('g', 'p')).toThrow('Cannot nest p inside g: it would create a cycle');
+    expect(() => k.addChild('c', 'c')).toThrow('Cannot nest c inside c: it would create a cycle');
+  });
+
+  it('addChild rejects a second parent', () => {
+    const k = kit().addChild('p', 'c');
+
+    expect(() => k.addChild('g', 'c')).toThrow('Element c already has a parent: p');
+  });
+
+  it('validate reports cycles built outside the facade instead of recursing forever', () => {
+    const k = kit();
+    k.getElement('p')!.addChild(k.getElement('c')!);
+    k.getElement('c')!.addChild(k.getElement('p')!);
+
+    expect(k.validate().map(d => d.code)).toContain('ELEMENT_HIERARCHY_CYCLE');
+    expect(() => k.generate()).toThrow('is nested inside itself');
+  });
+
+  it('validate reports an element with two parents', () => {
+    const k = kit();
+    k.getElement('p')!.addChild(k.getElement('c')!);
+    k.getElement('g')!.addChild(k.getElement('c')!);
+
+    expect(k.validate()).toEqual([{
+      code: 'ELEMENT_MULTIPLE_PARENTS',
+      message: 'Element c has more than one parent: p, g',
+    }]);
+  });
+
+  it('toArchimate throws on a cycle instead of overflowing the stack', () => {
+    const a = new Element('a', { type: 'Grouping', label: 'A' });
+    const b = new Element('b', { type: 'Grouping', label: 'B' });
+    a.addChild(b);
+    b.addChild(a);
+
+    expect(() => new PlantKit().toArchimate(a)).toThrow('Element a is nested inside itself');
+  });
+});
