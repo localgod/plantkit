@@ -78,15 +78,21 @@ The Gitpod environment includes:
 
 ## Development Workflow
 
+### Toolchain
+
+PlantKit uses [Vite+](https://viteplus.dev/guide/), which bundles Oxfmt, Oxlint, Vitest and tsdown behind one `vp` CLI and one config file, `vite.config.ts`. `vite-plus` is a dev dependency, so `npm install` is all you need: the scripts below call the local `vp`. To run `vp` directly, use `npx vp <command>`, or install the [global CLI](https://viteplus.dev/guide/global-cli).
+
 ### Available Scripts
 
-- **`npm run build`** - Compile TypeScript to JavaScript
-- **`npm run dev`** - Watch mode for development
-- **`npm test`** - Run tests with Vitest
+- **`npm run build`** - Bundle `src/` into `dist/index.mjs` and `dist/index.d.mts` (`vp pack`; `prebuild` regenerates `src/index.mts`)
+- **`npm run dev`** - Rebuild on change (`vp pack --watch`)
+- **`npm run check`** - Format check, lint and type check in one pass (`vp check`; `vp check --fix` fixes what it can). Build first: `examples/` and `scripts/generate-smoke.mts` import the built package.
+- **`npm run fmt`** - Format the code with Oxfmt (`vp fmt`)
+- **`npm test`** - Run tests with Vitest (`vp test`)
 - **`npm run test:coverage`** - Run tests with coverage report
 - **`npm run test:neutral`** - Check that `./dist` is runtime-neutral (no `node:` or bare imports; runs without Node/DOM globals)
 - **`npm run test:plantuml`** - Render the generated smoke diagrams with PlantUML (needs `npm run build` and `./support.sh`)
-- **`npm run lint`** - Lint source code with Oxlint
+- **`npm run lint`** - Lint with Oxlint (`vp lint`)
 - **`npm run lint:fix`** - Auto-fix linting issues
 - **`npm run mdlint`** - Lint markdown files
 
@@ -113,10 +119,10 @@ Use descriptive branch names:
 1. **Test your changes:**
 
 ```bash
-npm run lint
+npm run build
+npm run check
 npm run mdlint
 npm test
-npm run build
 ```
 
 1. **Commit your changes:**
@@ -198,7 +204,7 @@ tests/
 Example test structure:
 
 ```typescript
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vite-plus/test';
 import { YourClass } from '../src/YourClass.mjs';
 
 describe('YourClass', () => {
@@ -280,7 +286,7 @@ Before submitting, ensure:
 
 - [ ] Code follows project style guidelines
 - [ ] All tests pass (`npm test`)
-- [ ] Linting passes (`npm run lint` and `npm run mdlint`)
+- [ ] Checks pass (`npm run check` and `npm run mdlint`)
 - [ ] Build succeeds (`npm run build`)
 - [ ] New tests added for new functionality
 - [ ] Documentation updated (if applicable)

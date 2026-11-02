@@ -6,3 +6,4 @@
 !tests/fixtures/plantuml-smoke.puml
 /*.csv
 /out
+.vitest/

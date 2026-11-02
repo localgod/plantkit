@@ -3,20 +3,26 @@
   "version": "1.1.0",
   "description": "",
   "keywords": [
+    "archimate",
     "plantuml",
-    "typescript",
-    "archimate"
+    "typescript"
   ],
   "homepage": "https://github.com/localgod/plantkit#README",
   "bugs": {
     "url": "https://github.com/localgod/plantkit/issues"
   },
+  "license": "MIT",
+  "author": "Johannes Skov Frandsen",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/localgod/plantkit.git"
   },
-  "license": "MIT",
-  "author": "Johannes Skov Frandsen",
+  "directories": {
+    "test": "tests"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "sideEffects": false,
   "module": "./dist/index.mjs",
@@ -28,33 +34,32 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist"
-  ],
-  "directories": {
-    "test": "tests"
-  },
   "scripts": {
     "prebuild": "node scripts/generate-index.js",
-    "build": "tsc --project tsconfig.json",
-    "dev": "tsc --watch",
-    "exec": "node ./dist/src/PlantKit.mjs",
-    "lint": "oxlint ./src",
-    "lint:fix": "oxlint --fix ./src",
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "fmt": "vp fmt",
+    "check": "vp check",
     "mdlint": "markdownlint '**/*.md' --ignore node_modules --ignore slides --disable MD033 MD013 MD041",
-    "test": "vitest",
+    "test": "vp test",
     "test:plantuml": "bash scripts/smoke-plantuml.sh",
-    "test:coverage": "vitest --coverage",
+    "test:coverage": "vp test --coverage",
     "test:neutral": "node scripts/check-runtime-neutral.mjs"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
-    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/coverage-v8": "5.0.5",
     "csv": "^6.3.11",
     "esbuild": "^0.28.2",
     "markdownlint-cli": "^0.50.0",
-    "oxlint": "^1.49.0",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.0"
+    "vite-plus": "1.4.0",
+    "vitest": "5.0.5"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vitest": "5.0.5"
   }
 }
