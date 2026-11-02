@@ -84,6 +84,7 @@ The Gitpod environment includes:
 - **`npm run dev`** - Watch mode for development
 - **`npm test`** - Run tests with Vitest
 - **`npm run test:coverage`** - Run tests with coverage report
+- **`npm run test:plantuml`** - Render the generated smoke diagrams with PlantUML (needs `npm run build` and `./support.sh`)
 - **`npm run lint`** - Lint source code with Oxlint
 - **`npm run lint:fix`** - Auto-fix linting issues
 - **`npm run mdlint`** - Lint markdown files
@@ -232,6 +233,13 @@ npm run test:coverage
 npm run dev  # In one terminal
 npm test     # In another terminal
 ```
+
+### Rendering Tests
+
+Unit tests check the generated text; rendering tests check that PlantUML accepts it. Both need Java and `plantuml.jar`, which `./support.sh` installs (CI runs it on every push):
+
+- `tests/render.test.mts` renders generated output with the real jar and is skipped when Java or the jar is missing. It also checks that every element and relationship type plantkit declares exists in the bundled Archimate stdlib.
+- `npm run test:plantuml` builds smoke diagrams through the public API of `./dist` (`scripts/generate-smoke.mts`): every element type (containers nested), every relationship type, and labels with quotes, newlines, backslashes and non-ASCII text, with special shapes on and off, plus a clean variant. It renders each one with `-failfast2` and fails on any error. The output goes to `out/smoke/`.
 
 ## Submitting Changes
 

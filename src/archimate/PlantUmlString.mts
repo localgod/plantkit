@@ -1,7 +1,13 @@
+/**
+ * Escapes text for a double-quoted argument of an Archimate-PlantUML
+ * procedure call. Backslashes are doubled, newlines become `\n`, and a
+ * double quote becomes `<U+0022>`: PlantUML rejects `\"` in these calls
+ * ("unquoted function/procedure cannot use expression").
+ */
 export function escapePlantUmlString(value: string): string {
   return value
     .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
+    .replace(/"/g, '<U+0022>')
     .replace(/\r?\n|\r/g, '\\n');
 }
 

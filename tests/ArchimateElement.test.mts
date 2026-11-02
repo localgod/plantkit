@@ -29,7 +29,7 @@ describe('ArchimateElement', () => {
       'Order "payment"\\review\nprocess',
     );
 
-    expect(result).toBe('Business_Process("BP_\\"001", "Order \\"payment\\"\\\\review\\nprocess")');
+    expect(result).toBe('Business_Process("BP_<U+0022>001", "Order <U+0022>payment<U+0022>\\\\review\\nprocess")');
   });
 
   it('passes $nest = 1 when the element opens a block', () => {

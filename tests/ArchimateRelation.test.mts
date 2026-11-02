@@ -10,6 +10,6 @@ describe('ArchimateRelation', () => {
       'Data "flow"\nnext',
     );
 
-    expect(result).toBe('Rel_Flow("source_\\"id", "target_\\\\id","Data \\"flow\\"\\nnext")');
+    expect(result).toBe('Rel_Flow("source_<U+0022>id", "target_\\\\id","Data <U+0022>flow<U+0022>\\nnext")');
   });
 });
