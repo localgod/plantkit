@@ -56,6 +56,36 @@ Complete support for all ArchiMate relationships with directional variants:
 npm install plantkit
 ```
 
+## Upgrading from 1.x
+
+2.0 changes generated output and adds validation. Diagrams that rendered in 1.x still render, but the text differs, and some models that produced broken output now fail early instead.
+
+**Element aliases changed.** Derived aliases now keep case and encode punctuation, so distinct ids always get distinct aliases (`Customer` was `ID_customer` and is now `ID_Customer`; `Order Process` was `ID_order_process` and is now `ID_Order_x20Process`). If you refer to aliases yourself, for example in raw PlantUML passed to `addToBody()`, get them with `PlantKit.aliasOf(element)` rather than writing them by hand. To keep the 1.x aliases, set them explicitly:
+
+```typescript
+// The 1.x alias derivation. Distinct ids can collide; addElement() reports that.
+const legacyAlias = (id: string) =>
+  `ID_${
+    id
+      .toLowerCase()
+      .replace(/[\s-]+/g, '_')
+      .replace(/[^a-z0-9_]/g, '') || 'element'
+  }`;
+
+kit.addElement(id, type, label, { alias: legacyAlias(id) });
+```
+
+**`generate()` rejects more models.** `validate()` reports new diagnostics, and `generate()` throws when there are any: an element nested in two parents (1.x wrote it twice), a cycle in the hierarchy (1.x recursed until the stack overflowed), or children inside a `Junction_Or`/`Junction_And` (1.x wrote output that does not render). Nest elements with the new `addChild(parentId, childId)`, which rejects these cases up front. TypeScript code that switches exhaustively over `ValidationDiagnostic['code']` must handle `ELEMENT_ALIAS_INVALID`, `ELEMENT_ALIAS_DUPLICATE`, `ELEMENT_HIERARCHY_CYCLE`, `ELEMENT_MULTIPLE_PARENTS` and `ELEMENT_CANNOT_CONTAIN`.
+
+**Output that changed without any action needed:**
+
+- The facade writes `!include <archimate/Archimate>`. If you include your own copy or theme, pass `{ include: false }` to `create()` (a second include also renders, but is redundant).
+- `@startuml` names are reduced to `[A-Za-z0-9_.-]`, so `My View` becomes `My_View`, which also changes the file name PlantUML renders to. Titles are escaped, so a newline in a title is a line break, not new diagram source.
+- Nested children are written once, inside their parent. Parents pass `$nest` (`Type("alias", "label", 1) {`), so they render as containers with `$ARCH_SPECIAL_SHAPES` on.
+- There is no empty `legend` block when there are no sprites, and no empty `title` line.
+- Double quotes in labels are written as `<U+0022>`. 1.x wrote `\"`, which PlantUML rejects.
+- The `Grouping`, `Group` and `Physical_DistributionNetwork` sprites point to sprites that exist. In 1.x, diagrams with these types failed to render.
+
 ## Quick Start
 
 ### Simple API (Recommended)
