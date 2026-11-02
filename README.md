@@ -285,7 +285,8 @@ const plantkit = new PlantKit();
 // Convert elements to ArchiMate syntax
 plantkit.toArchimate(element);              // Element tree to PlantUML
 plantkit.toArchimateRelations(graph);      // Relations to PlantUML
-PlantKit.toValidElementName('My Element'); // Generate valid IDs
+PlantKit.toValidElementName('My Element'); // 'ID_My_x20Element'
+PlantKit.aliasOf(element);                 // alias property, or the derived alias
 
 // Debug output
 plantkit.printNode(element);               // Print element tree
@@ -303,6 +304,23 @@ const kit = PlantKit.create('business-model', 'Business Model')
 const diagnostics = kit.validate(); // [] for a valid model
 const plantuml = kit.generate();
 ```
+
+### PlantUML Aliases
+
+Each element is written with a PlantUML alias. By default the alias is derived from the element id with `PlantKit.toValidElementName()`. Distinct ids always give distinct aliases: ASCII letters and digits are kept (case included), and any other character is encoded by its code point (`-` becomes `_x2d`, `€` becomes `_u20ac`).
+
+To choose the alias yourself, set the `alias` property. It must match `[A-Za-z_][A-Za-z0-9_]*`, and the facade rejects an alias that is already in use:
+
+```typescript
+PlantKit.create('view', 'View')
+  .addElement('id-3f2A', 'Business_Actor', 'Customer', { alias: 'E1' })
+  .addElement('id-9c1b', 'Business_Process', 'Order handling', { alias: 'E2' })
+  .addRelation('id-3f2A', 'id-9c1b', 'Rel_Triggering', 'starts')
+  .generate();
+// Business_Actor("E1", "Customer") ...
+```
+
+`toArchimate()` and `toArchimateRelations()` honour the same property.
 
 ## Advanced Features
 
