@@ -94,7 +94,6 @@ PlantKit uses [Vite+](https://viteplus.dev/guide/), which bundles Oxfmt, Oxlint,
 - **`npm run test:plantuml`** - Render the generated smoke diagrams with PlantUML (needs `npm run build` and `./support.sh`)
 - **`npm run lint`** - Lint with Oxlint (`vp lint`)
 - **`npm run lint:fix`** - Auto-fix linting issues
-- **`npm run mdlint`** - Lint markdown files
 
 ### Making Changes
 
@@ -121,7 +120,6 @@ Use descriptive branch names:
 ```bash
 npm run build
 npm run check
-npm run mdlint
 npm test
 ```
 
@@ -169,7 +167,7 @@ test: add coverage for edge cases in PlantKit.toValidElementName
 
 ### Code Style
 
-Formatting is enforced by Oxfmt (`npm run fmt`; configured in `vite.config.ts`: single quotes) and checked by `npm run check` and the pre-commit hook. Don't format by hand.
+Formatting of code and Markdown is enforced by Oxfmt (`npm run fmt`; configured in `vite.config.ts`: single quotes) and checked by `npm run check` and the pre-commit hook. Don't format by hand.
 
 - Follow existing patterns in the codebase
 
@@ -289,7 +287,7 @@ Before submitting, ensure:
 
 - [ ] Code follows project style guidelines
 - [ ] All tests pass (`npm test`)
-- [ ] Checks pass (`npm run check` and `npm run mdlint`)
+- [ ] Checks pass (`npm run check`)
 - [ ] Build succeeds (`npm run build`)
 - [ ] New tests added for new functionality
 - [ ] Documentation updated (if applicable)
@@ -300,7 +298,7 @@ Before submitting, ensure:
 
 All pull requests automatically run:
 
-- **Linting** - Oxlint and markdownlint
+- **Linting and formatting** - Oxlint, and Oxfmt (code and Markdown)
 - **Tests** - Full test suite with coverage
 - **Build** - TypeScript compilation
 
@@ -329,6 +327,7 @@ When reporting bugs, please include:
 Brief description of the bug
 
 **Steps to Reproduce:**
+
 1. Step one
 2. Step two
 3. Step three
@@ -340,6 +339,7 @@ What should happen
 What actually happens
 
 **Environment:**
+
 - PlantKit version: 1.1.0
 - Node.js version: 24.21.0
 - OS: Ubuntu 24.04

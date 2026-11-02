@@ -43,7 +43,6 @@
     "lint:fix": "vp lint --fix",
     "fmt": "vp fmt",
     "check": "vp check",
-    "mdlint": "markdownlint '**/*.md' --ignore node_modules --ignore slides --disable MD033 MD013 MD041",
     "test": "vp test",
     "test:plantuml": "bash scripts/smoke-plantuml.sh",
     "test:coverage": "vp test --coverage",
@@ -54,7 +53,6 @@
     "@vitest/coverage-v8": "5.0.5",
     "csv": "^6.3.11",
     "esbuild": "^0.28.2",
-    "markdownlint-cli": "^0.50.0",
     "typescript": "^7.0.2",
     "vite-plus": "1.4.0",
     "vitest": "5.0.5"

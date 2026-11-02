@@ -40,10 +40,9 @@ jobs:
         run: |
           vp run prebuild
           vp pack
+      # Formatting covers Markdown too.
       - name: Check (format, lint, type check)
         run: vp check
-      - name: Lint Markdown
-        run: vp run mdlint
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
