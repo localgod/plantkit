@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { escapePlantUmlLine, escapePlantUmlString, toPlantUmlDiagramName } from '../src/archimate/PlantUmlString.mjs';
 
 describe('PlantUmlString', () => {
-  it('escapes quotes, backslashes and every newline style in strings', () => {
-    expect(escapePlantUmlString('a"b\\c\nd\r\ne\rf')).toBe('a\\"b\\\\c\\nd\\ne\\nf');
+  it('escapes quotes as <U+0022>, backslashes and every newline style in strings', () => {
+    expect(escapePlantUmlString('a"b\\c\nd\r\ne\rf')).toBe('a<U+0022>b\\\\c\\nd\\ne\\nf');
   });
 
   it('escapes backslashes and newlines but keeps quotes in lines', () => {
