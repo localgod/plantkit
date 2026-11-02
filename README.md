@@ -162,6 +162,9 @@ kit.addRelation(fromId, toId, relationType, label?);
 // Nest an element inside another (chainable)
 kit.addChild(parentId, childId);
 
+// Add a note, optionally attached to one or more elements (chainable)
+kit.addNote(id, text, { attachTo?: id | id[] }, properties?);
+
 // Get element for advanced manipulation
 const element = kit.getElement(id);
 
@@ -303,6 +306,19 @@ const kit = PlantKit.create('business-model', 'Business Model')
 const diagnostics = kit.validate(); // [] for a valid model
 const plantuml = kit.generate();
 ```
+
+### Notes
+
+```typescript
+kit.addNote('n1', 'Owned by the\npayments team', { attachTo: 'orderProcess' });
+```
+
+```plantuml
+note "Owned by the\npayments team" as ID_n1
+ID_n1 .. ID_orderProcess
+```
+
+The text is escaped the same way as labels. A note without `attachTo` stands alone, and `attachTo` also takes an array of ids. Notes can be nested like elements (`kit.addChild('group', 'n1')`), but they can't contain elements or be relationship endpoints. In a plain `Element` tree, a note is an element with `type: 'Note'` (`NOTE_TYPE`) and its text in `label`.
 
 ### Output Options
 

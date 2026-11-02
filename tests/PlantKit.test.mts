@@ -661,3 +661,78 @@ describe('Standalone output (#244)', () => {
     expect(output).not.toContain('direction');
   });
 });
+
+describe('Notes (#248)', () => {
+  const base = () => PlantKit.create('n', 'N', { sprites: false, scale: null, layout: null })
+    .addElement('orderProcess', 'Business_Process', 'Order process')
+    .addElement('payments', 'Grouping', 'Payments');
+
+  it('writes an attached note and its connector after the elements', () => {
+    const output = base().addNote('n1', 'Owned by the\npayments team', { attachTo: 'orderProcess' }).generate();
+
+    expect(output).toContain('note "Owned by the\\npayments team" as ID_n1');
+    expect(output).toContain('ID_n1 .. ID_orderProcess');
+    expect(output.indexOf('ID_n1 .. ID_orderProcess')).toBeGreaterThan(output.indexOf('Grouping("ID_payments"'));
+  });
+
+  it('writes a stand-alone note without a connector', () => {
+    const output = base().addNote('n1', 'Just a note').generate();
+
+    expect(output).toContain('note "Just a note" as ID_n1');
+    expect(output).not.toContain(' .. ');
+  });
+
+  it('attaches a note to several elements', () => {
+    const output = base().addNote('n1', 'Both', { attachTo: ['orderProcess', 'payments'] }).generate();
+
+    expect(output).toContain('ID_n1 .. ID_orderProcess');
+    expect(output).toContain('ID_n1 .. ID_payments');
+  });
+
+  it('escapes the text like labels', () => {
+    const output = base().addNote('n1', 'Say "hi" \\ there').generate();
+
+    expect(output).toContain('note "Say <U+0022>hi<U+0022> \\\\ there" as ID_n1');
+  });
+
+  it('nests a note inside a group', () => {
+    const output = base().addNote('n1', 'Inside').addChild('payments', 'n1').generate();
+
+    expect(output).toContain('Grouping("ID_payments", "Payments") {\n  note "Inside" as ID_n1\n}');
+    expect(output.match(/note "Inside"/g)).toHaveLength(1);
+  });
+
+  it('honours an explicit alias', () => {
+    const output = base().addNote('n1', 'Aliased', { attachTo: 'orderProcess' }, { alias: 'N1' }).generate();
+
+    expect(output).toContain('note "Aliased" as N1');
+    expect(output).toContain('N1 .. ID_orderProcess');
+  });
+
+  it('rejects an unknown attachTo target, a duplicate id and a duplicate alias', () => {
+    expect(() => base().addNote('n1', 'x', { attachTo: 'nope' })).toThrow('Element not found: nope');
+    expect(() => base().addNote('orderProcess', 'x')).toThrow('Duplicate element id: orderProcess');
+    expect(() => base().addNote('n1', 'x', {}, { alias: 'ID_payments' })).toThrow('Duplicate PlantUML element alias: ID_payments');
+  });
+
+  it('a note cannot contain elements or be a relationship endpoint', () => {
+    const kit = base().addNote('n1', 'x');
+
+    expect(() => kit.addChild('n1', 'orderProcess')).toThrow('Element n1 of type Note cannot contain other elements');
+    expect(() => kit.addRelation('n1', 'orderProcess', 'Rel_Flow')).toThrow('Notes cannot be relationship endpoints');
+  });
+
+  it('validates and writes no sprite for notes', () => {
+    const kit = PlantKit.create('n', 'N').addNote('n1', 'x');
+
+    expect(kit.validate()).toEqual([]);
+    expect(kit.generate()).not.toContain('sprite');
+  });
+
+  it('works on a plain Element tree with toArchimate', () => {
+    const group = new Element('g', { type: 'Grouping', label: 'G' });
+    group.addChild(new Element('n', { type: 'Note', label: 'Hello' }));
+
+    expect(new PlantKit().toArchimate(group)).toBe('Grouping("ID_g", "G") {\n  note "Hello" as ID_n\n}');
+  });
+});

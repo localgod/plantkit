@@ -83,4 +83,21 @@ describe.runIf(plantUmlAvailable)('Rendering generated output with PlantUML', ()
     expect(text).toContain('Ærø');
     expect(text).toContain('the "role"');
   });
+
+  it('renders attached, stand-alone and nested notes (#248)', () => {
+    const svg = renderPlantUml(PlantKit.create('notes', 'Notes')
+      .addElement('payments', 'Grouping', 'Payments')
+      .addElement('orderProcess', 'Business_Process', 'Order process')
+      .addChild('payments', 'orderProcess')
+      .addNote('n1', 'Owned by the\npayments "team"', { attachTo: 'orderProcess' })
+      .addNote('n2', 'Stand-alone')
+      .addNote('n3', 'Inside the group')
+      .addChild('payments', 'n3')
+      .generate());
+
+    const text = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map(match => match[1]).join(' ').replace(/\s+/g, ' ');
+    expect(text).toContain('payments "team"');
+    expect(text).toContain('Stand-alone');
+    expect(text).toContain('Inside the group');
+  });
 });
