@@ -75,6 +75,16 @@ function buildKit(options: Record<string, unknown> = {}) {
     .addNote('note-nested', 'Inside a group')
     .addChild('el-Group', 'note-nested');
 
+  // Unnamed elements, junctions, groups and notes (#263).
+  kit
+    .addElement('empty-component', 'Application_Component', '')
+    .addElement('empty-junction', 'Junction_Or', '')
+    .addElement('empty-grouping', 'Grouping', '')
+    .addElement('empty-child', 'Business_Object', 'Inside an unnamed group')
+    .addChild('empty-grouping', 'empty-child')
+    .addNote('empty-note', '', { attachTo: 'empty-component' })
+    .addRelation('empty-component', 'empty-junction', 'Rel_Flow');
+
   kit
     .addRelation('id-AB', 'id-ab', 'Rel_Association', 'distinct aliases')
     .addRelation('id-ab', 'id_ab', 'Rel_Association', 'distinct aliases');
