@@ -75,8 +75,34 @@ export function isArchimateElementType(type: string): type is ArchimateElementTy
   return Object.values(ElementType).includes(type as ArchimateElementType);
 }
 
-function ArchimateElement(type: ArchimateElementType, alias: string, label: string): string {
-  return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlString(label)}")`;
+/** Archimate-PlantUML procedures that take only `($alias, $label)`, without `$nest`. */
+const typesWithoutNestParameter: ReadonlySet<string> = new Set([
+  ElementType.Grouping,
+  ElementType.Group,
+  ElementType.Junction_Or,
+  ElementType.Junction_And,
+]);
+
+/** Element types that cannot contain other elements (they never render with a `{ }` block). */
+const typesWithoutChildren: ReadonlySet<string> = new Set([
+  ElementType.Junction_Or,
+  ElementType.Junction_And,
+]);
+
+/** Whether elements of this type can contain nested elements. */
+export function canContainElements(type: ArchimateElementType): boolean {
+  return !typesWithoutChildren.has(type);
+}
+
+/**
+ * Writes an element procedure call. Pass `nest = true` for an element that
+ * opens a `{ }` block: the call then passes `$nest = 1`, so the stdlib draws
+ * a container instead of a special shape (actor, process, ...) that cannot
+ * hold children.
+ */
+function ArchimateElement(type: ArchimateElementType, alias: string, label: string, nest = false): string {
+  const nestArgument = nest && !typesWithoutNestParameter.has(type) ? ', 1' : '';
+  return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlString(label)}"${nestArgument})`;
 }
 
 ArchimateElement.type = ElementType;
