@@ -56,6 +56,15 @@ jobs:
         with:
           node-version: '24'
           cache: true
+      # support.sh pins versions and checksums, so its hash keys the cache;
+      # the script verifies restored files before using them.
+      - name: Cache PlantUML downloads
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            plantuml.jar
+            Archimate.puml
+          key: plantuml-${{ hashFiles('support.sh') }}
       - name: Install PlantUML
         run: |
           ./support.sh
