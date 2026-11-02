@@ -39,11 +39,12 @@ assignees: ''
 
 <!-- Please complete the following information -->
 
-- **PlantKit Version:** [e.g., 1.0.4]
-- **Node.js Version:** [e.g., 22.20.0]
-- **npm Version:** [e.g., 10.9.3]
-- **Operating System:** [e.g., Ubuntu 24.04, macOS 14, Windows 11]
-- **TypeScript Version:** [e.g., 5.7.2]
+- **PlantKit Version:** [e.g., 1.1.0]
+- **Runtime:** [e.g., Node.js 24.21.0, Chrome 140, QuickJS]
+- **Package manager:** [e.g., npm 11.19.0]
+- **Operating System:** [e.g., Ubuntu 24.04, macOS 15, Windows 11]
+- **TypeScript Version:** [e.g., 7.0.2]
+- **PlantUML Version (if rendering fails):** [e.g., 1.2026.8]
 
 ## Generated Output
 
@@ -57,9 +58,9 @@ assignees: ''
 
 ## Error Messages
 
-<!-- If applicable, include any error messages or stack traces -->
+<!-- If applicable, include any error messages or stack traces, from plantkit or from PlantUML -->
 
-```typescript
+```text
 Error messages here
 ```
 

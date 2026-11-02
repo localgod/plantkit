@@ -1,8 +1,59 @@
+# Release Drafter v7 configuration.
+#
+# Pull request titles follow conventional commits (feat:, fix:, docs:, ...).
+# Each change lands in the first matching category, and the categories
+# decide the next version: a breaking change (`feat!:`, `fix!:`, ...) is a
+# major bump, a feature is minor, everything else is a patch.
+#
+# Tags have no `v` prefix (1.0.4, 1.1.0, ...), matching the npm-publish
+# workflow's tag check.
+name-template: '$RESOLVED_VERSION'
+tag-template: '$RESOLVED_VERSION'
+
+categories:
+  - title: '💥 Breaking changes'
+    semver-increment: major
+    exclusive: true
+    when:
+      conventional:
+        breaking: true
+  - title: '📦 Dependencies'
+    collapse-after: 3
+    exclusive: true
+    when:
+      label: 'dependencies'
+  - title: '🚀 Features'
+    semver-increment: minor
+    exclusive: true
+    when:
+      - conventional:
+          type: 'feat'
+      - label: 'enhancement'
+  - title: '🐛 Bug fixes'
+    exclusive: true
+    when:
+      - conventional:
+          type: 'fix'
+      - label: 'bug'
+  - title: '📝 Documentation'
+    exclusive: true
+    when:
+      - conventional:
+          type: 'docs'
+      - label: 'documentation'
+  - title: '🧰 Maintenance'
+    exclusive: true
+    when:
+      conventional:
+        types: ['chore', 'ci', 'build', 'test', 'refactor', 'style', 'perf']
+  - type: 'version-resolver'
+    semver-increment: patch
+
+change-template: '- $TITLE (#$NUMBER) $AUTHORS'
+# Escape characters that would otherwise format or link in titles.
+change-title-escapes: '\<*_&'
+
 template: |
   ## What’s Changed
 
   $CHANGES
-
-categories:
-  - title: '📦 Dependencies'
-    label: 'dependencies'

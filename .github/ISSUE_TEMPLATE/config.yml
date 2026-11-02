@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/localgod/plantkit#readme
+    about: The README covers the API, ArchiMate support, output options and examples.
+  - name: Contributing guide
+    url: https://github.com/localgod/plantkit/blob/main/CONTRIBUTING.md
+    about: Development setup, commands and the pull request process.
