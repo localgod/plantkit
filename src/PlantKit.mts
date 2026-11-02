@@ -5,7 +5,7 @@ import { ElementGraph } from './ElementGraph.mjs';
 import { Diagram } from './Diagram.mjs';
 
 export interface ValidationDiagnostic {
-    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
+    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
     message: string;
 }
 
@@ -13,6 +13,7 @@ class PlantKit {
     private diagramInstance?: Diagram;
     private graphInstance?: ElementGraph;
     private elements?: Map<string, Element>;
+    private readonly aliases = new Map<string, string>();
 
     constructor(name?: string, title?: string) {
         if (name && title) {
@@ -41,14 +42,16 @@ class PlantKit {
         if (this.elements.has(id)) {
             throw new Error(`Duplicate element id: ${id}`);
         }
-        const alias = PlantKit.toValidElementName(id);
-        if (Array.from(this.elements.values()).some(element => PlantKit.toValidElementName(element.getName()) === alias)) {
-            throw new Error(`Duplicate PlantUML element alias: ${alias}`);
-        }
         if (properties && ('type' in properties || 'label' in properties)) {
             throw new Error('Element properties cannot override type or label');
         }
         const element = new Element(id, { type, label, ...properties });
+        const alias = PlantKit.aliasOf(element);
+        const owner = this.aliases.get(alias);
+        if (owner !== undefined) {
+            throw new Error(`Duplicate PlantUML element alias: ${alias} (already used by ${owner})`);
+        }
+        this.aliases.set(alias, id);
         this.elements.set(id, element);
         this.graphInstance.addNode(element);
         return this;
@@ -146,6 +149,26 @@ class PlantKit {
             }
         });
 
+        const aliasOwners = new Map<string, string>();
+        this.elements.forEach(element => {
+            let alias: string;
+            try {
+                alias = PlantKit.aliasOf(element);
+            } catch (error) {
+                diagnostics.push({ code: 'ELEMENT_ALIAS_INVALID', message: (error as Error).message });
+                return;
+            }
+            const owner = aliasOwners.get(alias);
+            if (owner !== undefined) {
+                diagnostics.push({
+                    code: 'ELEMENT_ALIAS_DUPLICATE',
+                    message: `Elements ${owner} and ${element.getName()} share the PlantUML alias ${alias}`,
+                });
+            } else {
+                aliasOwners.set(alias, element.getName());
+            }
+        });
+
         this.elements.forEach(element => {
             const type = element.getProperties()['type']?.toString();
             if (!type) {
@@ -221,14 +244,58 @@ class PlantKit {
         return this.elements.get(id);
     }
 
+    /**
+     * Derives a PlantUML alias from an element id. The mapping is injective:
+     * distinct ids always give distinct aliases. ASCII letters and digits are
+     * kept as they are (case included). Any other character is written as
+     * `_xHH`, `_uHHHH` or `_UHHHHHH` (lowercase hex code point), and an
+     * underscore is doubled when it could otherwise be read as the start of
+     * such an escape.
+     */
     public static toValidElementName(input: string): string {
-        let transformed = input.toLowerCase();
-        transformed = transformed.replace(/[\s-]+/g, '_');
-        transformed = transformed.replace(/[^a-z0-9_]/g, '');
-        if (!transformed) {
-            transformed = "element";
+        const chars = Array.from(input);
+        let out = '';
+        chars.forEach((char, index) => {
+            if (/^[A-Za-z0-9]$/.test(char)) {
+                out += char;
+            } else if (char === '_') {
+                const next = chars[index + 1];
+                // The next output character starts an escape (`_`) or is an escape marker.
+                const ambiguous = next !== undefined && (!/^[A-Za-z0-9]$/.test(next) || /^[xuU]$/.test(next));
+                out += ambiguous ? '__' : '_';
+            } else {
+                const codePoint = char.codePointAt(0) as number;
+                if (codePoint <= 0xff) {
+                    out += `_x${codePoint.toString(16).padStart(2, '0')}`;
+                } else if (codePoint <= 0xffff) {
+                    out += `_u${codePoint.toString(16).padStart(4, '0')}`;
+                } else {
+                    out += `_U${codePoint.toString(16).padStart(6, '0')}`;
+                }
+            }
+        });
+        return `ID_${out}`;
+    }
+
+    /** Whether `alias` can be used as a caller-supplied PlantUML alias. */
+    public static isValidAlias(alias: string): boolean {
+        return /^[A-Za-z_][A-Za-z0-9_]*$/.test(alias);
+    }
+
+    /**
+     * The PlantUML alias used for an element: its `alias` property when set,
+     * otherwise `toValidElementName(name)`.
+     */
+    public static aliasOf(element: Element): string {
+        const alias = element.getProperties()['alias'];
+        if (alias === undefined) {
+            return PlantKit.toValidElementName(element.getName());
         }
-        return `ID_${transformed}`;
+        const value = alias.toString();
+        if (!PlantKit.isValidAlias(value)) {
+            throw new Error(`Invalid PlantUML alias for element ${element.getName()}: ${value}`);
+        }
+        return value;
     }
 
     public printNode(node: Element, indent = 0): void {
@@ -256,7 +323,7 @@ class PlantKit {
 
     public printArchimate(node: Element, indent = 0): void {
         const children = node.getChildren();
-        const name = PlantKit.toValidElementName(node.getName());
+        const name = PlantKit.aliasOf(node);
         const properties = node.getProperties();
         let type = "";
         if (Object.prototype.hasOwnProperty.call(properties, "type")) {
@@ -283,7 +350,7 @@ class PlantKit {
 
     public toArchimate(node: Element, out: string[] = [], indent = 0): string {
         const children = node.getChildren();
-        const name = PlantKit.toValidElementName(node.getName());
+        const name = PlantKit.aliasOf(node);
         const properties = node.getProperties();
         let type = "";
         if (Object.prototype.hasOwnProperty.call(properties, "type")) {
@@ -317,8 +384,8 @@ class PlantKit {
                 if (!isArchimateRelationType(type)) {
                     throw new Error(`Unknown ArchiMate relationship type: ${type}`);
                 }
-                const source = PlantKit.toValidElementName(relation.source.getName());
-                const target = PlantKit.toValidElementName(relation.target.getName());
+                const source = PlantKit.aliasOf(relation.source);
+                const target = PlantKit.aliasOf(relation.target);
                 const label = relation.properties?.['label']?.toString() ?? '';
                 console.log('  '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }
@@ -334,8 +401,8 @@ class PlantKit {
                 if (!isArchimateRelationType(type)) {
                     throw new Error(`Unknown ArchiMate relationship type: ${type}`);
                 }
-                const source = PlantKit.toValidElementName(relation.source.getName());
-                const target = PlantKit.toValidElementName(relation.target.getName());
+                const source = PlantKit.aliasOf(relation.source);
+                const target = PlantKit.aliasOf(relation.target);
                 const label = relation.properties?.['label']?.toString() ?? '';
                 out.push(' '.repeat(indent + 1) + ArchimateRelation(type, source, target, label));
             }

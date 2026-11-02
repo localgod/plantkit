@@ -71,12 +71,58 @@ describe('PlantKit', () => {
         expect(kit.graph.getNodes()).toHaveLength(1);
       });
 
-      it('rejects IDs that produce a duplicate PlantUML alias', () => {
-        const kit = PlantKit.create('test', 'Test');
-        kit.addElement('Order Process', 'Business_Process', 'Order process');
+      it('gives distinct aliases to ids that differ only in case or punctuation', () => {
+        const kit = PlantKit.create('test', 'Test')
+          .addElement('id-AB', 'Business_Actor', 'A')
+          .addElement('id-ab', 'Business_Actor', 'B')
+          .addElement('id_ab', 'Business_Actor', 'C')
+          .addElement('id ab', 'Business_Actor', 'D');
 
-        expect(() => kit.addElement('order-process', 'Business_Process', 'Replacement process'))
-          .toThrow('Duplicate PlantUML element alias: ID_order_process');
+        const output = kit.generate();
+        expect(output).toContain('Business_Actor("ID_id_x2dAB", "A")');
+        expect(output).toContain('Business_Actor("ID_id_x2dab", "B")');
+        expect(output).toContain('Business_Actor("ID_id_ab", "C")');
+        expect(output).toContain('Business_Actor("ID_id_x20ab", "D")');
+      });
+
+      it('uses a caller-supplied alias for elements and relations', () => {
+        const output = PlantKit.create('test', 'Test')
+          .addElement('id-3f2A', 'Business_Actor', 'Customer', { alias: 'E1' })
+          .addElement('id-9c1b', 'Business_Process', 'Order handling', { alias: 'E2' })
+          .addRelation('id-3f2A', 'id-9c1b', 'Rel_Triggering', 'starts')
+          .generate();
+
+        expect(output).toContain('Business_Actor("E1", "Customer")');
+        expect(output).toContain('Business_Process("E2", "Order handling")');
+        expect(output).toContain('Rel_Triggering("E1", "E2","starts")');
+      });
+
+      it('rejects a caller-supplied alias that is already in use', () => {
+        const kit = PlantKit.create('test', 'Test')
+          .addElement('customer', 'Business_Actor', 'Customer');
+
+        expect(() => kit.addElement('other', 'Business_Actor', 'Other', { alias: 'ID_customer' }))
+          .toThrow('Duplicate PlantUML element alias: ID_customer (already used by customer)');
+        expect(kit.getElement('other')).toBeUndefined();
+      });
+
+      it('rejects an invalid caller-supplied alias', () => {
+        const kit = PlantKit.create('test', 'Test');
+
+        expect(() => kit.addElement('a', 'Business_Actor', 'A', { alias: 'has space' }))
+          .toThrow('Invalid PlantUML alias for element a: has space');
+      });
+
+      it('reports aliases that collide after an element is changed', () => {
+        const kit = PlantKit.create('test', 'Test')
+          .addElement('a', 'Business_Actor', 'A')
+          .addElement('b', 'Business_Actor', 'B');
+        kit.getElement('b')!.getProperties()['alias'] = 'ID_a';
+
+        expect(kit.validate()).toEqual([{
+          code: 'ELEMENT_ALIAS_DUPLICATE',
+          message: 'Elements a and b share the PlantUML alias ID_a',
+        }]);
       });
 
       it('rejects an unknown element type', () => {
@@ -220,7 +266,7 @@ describe('PlantKit', () => {
         expect(output).toContain('@startuml business-model');
         expect(output).toContain('title Business Model');
         expect(output).toContain('Business_Actor("ID_customer", "Customer")');
-        expect(output).toContain('Business_Process("ID_orderprocess", "Order Processing")');
+        expect(output).toContain('Business_Process("ID_orderProcess", "Order Processing")');
         expect(output).toContain('Rel_Triggering');
         expect(output).toContain('@enduml');
       });
@@ -376,21 +422,21 @@ describe('PlantKit', () => {
     it('prints Archimate relations correctly', () => {
       plantKit.printArchimateRelations(nodeGraph);
 
-      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_root", "ID_child_1","Access")');
-      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_root", "ID_child_2","Access")');
-      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Access("ID_child_1", "ID_grandchild","Access")');
+      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_Root", "ID_Child_x201","Access")');
+      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_Root", "ID_Child_x202","Access")');
+      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Access("ID_Child_x201", "ID_Grandchild","Access")');
     });
 
     it('prints Archimate node structure with children', () => {
       plantKit.printArchimate(root);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Application_Collaboration("ID_root", "<b>Root</b>") {');
-      expect(consoleSpy).toHaveBeenCalledWith('  Application_Component("ID_child_1", "<b>Child 1</b>") {');
-      expect(consoleSpy).toHaveBeenCalledWith('    Motivation_Constraint("ID_grandchild", "<b>Grandchild</b>") {');
+      expect(consoleSpy).toHaveBeenCalledWith('Application_Collaboration("ID_Root", "<b>Root</b>") {');
+      expect(consoleSpy).toHaveBeenCalledWith('  Application_Component("ID_Child_x201", "<b>Child 1</b>") {');
+      expect(consoleSpy).toHaveBeenCalledWith('    Motivation_Constraint("ID_Grandchild", "<b>Grandchild</b>") {');
       expect(consoleSpy).toHaveBeenCalledWith('      Motivation_Constraint("ID_jonny", "<b>Grandchild</b>")');
       expect(consoleSpy).toHaveBeenCalledWith('    }');
       expect(consoleSpy).toHaveBeenCalledWith('  }');
-      expect(consoleSpy).toHaveBeenCalledWith('  Application_Interface("ID_child_2", "<b>Child 2</b>")');
+      expect(consoleSpy).toHaveBeenCalledWith('  Application_Interface("ID_Child_x202", "<b>Child 2</b>")');
       expect(consoleSpy).toHaveBeenCalledWith('}');
     });
   });
