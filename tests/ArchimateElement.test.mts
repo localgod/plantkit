@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ArchimateElement } from '../src/archimate/ArchimateElement.mjs';
+import { ArchimateElement, canContainElements } from '../src/archimate/ArchimateElement.mjs';
 
 describe('ArchimateElement', () => {
   it('should generate correct PlantUML element syntax', () => {
@@ -30,5 +30,23 @@ describe('ArchimateElement', () => {
     );
 
     expect(result).toBe('Business_Process("BP_\\"001", "Order \\"payment\\"\\\\review\\nprocess")');
+  });
+
+  it('passes $nest = 1 when the element opens a block', () => {
+    expect(ArchimateElement(ArchimateElement.type.Business_Actor, 'A', 'Actor', true)).toBe('Business_Actor("A", "Actor", 1)');
+    expect(ArchimateElement(ArchimateElement.type.Business_Actor, 'A', 'Actor', false)).toBe('Business_Actor("A", "Actor")');
+  });
+
+  it('omits $nest for procedures without that parameter', () => {
+    for (const type of [ArchimateElement.type.Grouping, ArchimateElement.type.Group, ArchimateElement.type.Junction_Or, ArchimateElement.type.Junction_And]) {
+      expect(ArchimateElement(type, 'A', 'L', true)).toBe(`${type}("A", "L")`);
+    }
+  });
+
+  it('knows which types can contain elements', () => {
+    expect(canContainElements(ArchimateElement.type.Grouping)).toBe(true);
+    expect(canContainElements(ArchimateElement.type.Business_Actor)).toBe(true);
+    expect(canContainElements(ArchimateElement.type.Junction_Or)).toBe(false);
+    expect(canContainElements(ArchimateElement.type.Junction_And)).toBe(false);
   });
 });

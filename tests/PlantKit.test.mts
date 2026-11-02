@@ -430,9 +430,9 @@ describe('PlantKit', () => {
     it('prints Archimate node structure with children', () => {
       plantKit.printArchimate(root);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Application_Collaboration("ID_Root", "<b>Root</b>") {');
-      expect(consoleSpy).toHaveBeenCalledWith('  Application_Component("ID_Child_x201", "<b>Child 1</b>") {');
-      expect(consoleSpy).toHaveBeenCalledWith('    Motivation_Constraint("ID_Grandchild", "<b>Grandchild</b>") {');
+      expect(consoleSpy).toHaveBeenCalledWith('Application_Collaboration("ID_Root", "<b>Root</b>", 1) {');
+      expect(consoleSpy).toHaveBeenCalledWith('  Application_Component("ID_Child_x201", "<b>Child 1</b>", 1) {');
+      expect(consoleSpy).toHaveBeenCalledWith('    Motivation_Constraint("ID_Grandchild", "<b>Grandchild</b>", 1) {');
       expect(consoleSpy).toHaveBeenCalledWith('      Motivation_Constraint("ID_jonny", "<b>Grandchild</b>")');
       expect(consoleSpy).toHaveBeenCalledWith('    }');
       expect(consoleSpy).toHaveBeenCalledWith('  }');
@@ -510,8 +510,8 @@ describe('Hierarchies (#241)', () => {
     const output = kit().addChild('p', 'c').addChild('c', 'g').generate();
 
     expect(output.match(/Business_Role\("ID_g", "G"\)/g)).toHaveLength(1);
-    expect(output.match(/Business_Actor\("ID_c", "C"\)/g)).toHaveLength(1);
-    expect(output).toContain('Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C") {\n    Business_Role("ID_g", "G")\n  }\n}');
+    expect(output.match(/Business_Actor\("ID_c", "C", 1\)/g)).toHaveLength(1);
+    expect(output).toContain('Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C", 1) {\n    Business_Role("ID_g", "G")\n  }\n}');
   });
 
   it('keeps top-level elements in registration order', () => {
@@ -565,5 +565,47 @@ describe('Hierarchies (#241)', () => {
     b.addChild(a);
 
     expect(() => new PlantKit().toArchimate(a)).toThrow('Element a is nested inside itself');
+  });
+});
+
+describe('Containers pass $nest (#245)', () => {
+  it('passes $nest = 1 for a parent and leaves leaves unchanged', () => {
+    const output = PlantKit.create('n', 'N')
+      .addElement('a', 'Business_Actor', 'A')
+      .addElement('s', 'Business_Service', 'S')
+      .addElement('r', 'Business_Role', 'R')
+      .addElement('p', 'Business_Process', 'P')
+      .addChild('a', 'r')
+      .addChild('s', 'p')
+      .generate();
+
+    expect(output).toContain('Business_Actor("ID_a", "A", 1) {\n  Business_Role("ID_r", "R")\n}');
+    expect(output).toContain('Business_Service("ID_s", "S", 1) {\n  Business_Process("ID_p", "P")\n}');
+  });
+
+  it('does not pass $nest to procedures that do not take it', () => {
+    const output = PlantKit.create('n', 'N')
+      .addElement('g', 'Grouping', 'G')
+      .addElement('h', 'Group', 'H')
+      .addElement('o', 'Business_Object', 'O')
+      .addElement('q', 'Business_Object', 'Q')
+      .addChild('g', 'o')
+      .addChild('h', 'q')
+      .generate();
+
+    expect(output).toContain('Grouping("ID_g", "G") {');
+    expect(output).toContain('Group("ID_h", "H") {');
+  });
+
+  it('rejects children inside a junction', () => {
+    const kit = PlantKit.create('n', 'N')
+      .addElement('j', 'Junction_And', 'J')
+      .addElement('o', 'Business_Object', 'O');
+
+    expect(() => kit.addChild('j', 'o')).toThrow('Element j of type Junction_And cannot contain other elements');
+
+    kit.getElement('j')!.addChild(kit.getElement('o')!);
+    expect(kit.validate().map(d => d.code)).toEqual(['ELEMENT_CANNOT_CONTAIN']);
+    expect(() => new PlantKit().toArchimate(kit.getElement('j')!)).toThrow('cannot contain other elements');
   });
 });

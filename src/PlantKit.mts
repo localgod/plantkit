@@ -1,11 +1,11 @@
 import { Element } from './Element.mjs';
-import { ArchimateElement, isArchimateElementType, type ArchimateElementType } from './archimate/ArchimateElement.mjs';
+import { ArchimateElement, canContainElements, isArchimateElementType, type ArchimateElementType } from './archimate/ArchimateElement.mjs';
 import { ArchimateRelation, isArchimateRelationType, type ArchimateRelationType } from './archimate/ArchimateRelation.mjs';
 import { ElementGraph } from './ElementGraph.mjs';
 import { Diagram } from './Diagram.mjs';
 
 export interface ValidationDiagnostic {
-    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'ELEMENT_HIERARCHY_CYCLE' | 'ELEMENT_MULTIPLE_PARENTS' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
+    code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'ELEMENT_HIERARCHY_CYCLE' | 'ELEMENT_MULTIPLE_PARENTS' | 'ELEMENT_CANNOT_CONTAIN' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
     message: string;
 }
 
@@ -92,6 +92,10 @@ class PlantKit {
         const child = this.elements.get(childId);
         if (!parent || !child) {
             throw new Error(`Element not found: ${!parent ? parentId : childId}`);
+        }
+        const parentType = parent.getProperties()['type']?.toString();
+        if (parentType && isArchimateElementType(parentType) && !canContainElements(parentType)) {
+            throw new Error(`Element ${parentId} of type ${parentType} cannot contain other elements`);
         }
         if (PlantKit.contains(child, parent)) {
             throw new Error(`Cannot nest ${childId} inside ${parentId}: it would create a cycle`);
@@ -205,6 +209,11 @@ class PlantKit {
                 diagnostics.push({
                     code: 'ELEMENT_TYPE_UNKNOWN',
                     message: `Element ${element.getName()} has unknown ArchiMate type: ${type}`,
+                });
+            } else if (element.getChildren().length > 0 && !canContainElements(type)) {
+                diagnostics.push({
+                    code: 'ELEMENT_CANNOT_CONTAIN',
+                    message: `Element ${element.getName()} of type ${type} cannot contain other elements`,
                 });
             }
         });
@@ -423,9 +432,12 @@ class PlantKit {
         if (type && !isArchimateElementType(type)) {
             throw new Error(`Unknown ArchiMate element type: ${type}`);
         }
+        if (children.length > 0 && type && !canContainElements(type as ArchimateElementType)) {
+            throw new Error(`Element ${node.getName()} of type ${type} cannot contain other elements`);
+        }
 
         if (children.length > 0) {
-            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label) + ' {');
+            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label, true) + ' {');
             for (const child of node.getChildren()) {
                 this.printArchimate(child, indent + 1);
             }
@@ -458,9 +470,12 @@ class PlantKit {
         if (type && !isArchimateElementType(type)) {
             throw new Error(`Unknown ArchiMate element type: ${type}`);
         }
+        if (children.length > 0 && type && !canContainElements(type as ArchimateElementType)) {
+            throw new Error(`Element ${node.getName()} of type ${type} cannot contain other elements`);
+        }
 
         if (children.length > 0) {
-            out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label) + ' {');
+            out.push('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label, true) + ' {');
             ancestors.add(node);
             for (const child of children) {
                 this.writeArchimate(child, out, indent + 1, ancestors);
