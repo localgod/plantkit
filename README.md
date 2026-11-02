@@ -150,8 +150,8 @@ graph.addRelation(app, database, 'Rel_Access_rw', {
 The `PlantKit` class provides a fluent, easy-to-use API for common use cases:
 
 ```typescript
-// Create a new diagram
-const kit = PlantKit.create('diagram-name', 'Diagram Title');
+// Create a new diagram (options are optional, see "Output Options")
+const kit = PlantKit.create('diagram-name', 'Diagram Title', { legend: true });
 
 // Add elements (chainable)
 kit.addElement(id, type, label, properties?);
@@ -166,9 +166,10 @@ kit.addChild(parentId, childId);
 const element = kit.getElement(id);
 
 // Configure diagram (chainable)
-kit.setScale(1.5);
-kit.setLayout('top to bottom direction');
+kit.setScale(1.5);                        // null omits the scale line
+kit.setLayout('top to bottom direction'); // null omits the layout line
 kit.addInclude('./custom.puml');
+kit.setOptions({ sprites: false });
 
 // Generate output
 const plantuml = kit.generate();
@@ -221,7 +222,6 @@ kit.addElement('e1', 'Business_Actor', 'Actor')
    .addElement('e2', 'Business_Process', 'Process');
 
 // Access diagram for advanced features
-kit.diagram.addInclude('./Archimate.puml');
 kit.diagram.setLayout('top to bottom direction');
 
 // Access graph for queries
@@ -303,6 +303,31 @@ const kit = PlantKit.create('business-model', 'Business Model')
 const diagnostics = kit.validate(); // [] for a valid model
 const plantuml = kit.generate();
 ```
+
+### Output Options
+
+`generate()` output renders on its own: the facade writes `!include <archimate/Archimate>` (the Archimate-PlantUML library bundled with PlantUML) before any include you add. Pass options to `create()` or `setOptions()`:
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `include` | `true` | Write `!include <archimate/Archimate>`. Turn it off when you include your own copy or theme with `addInclude()`. |
+| `sprites` | `true` | Write a `sprite` line for each element and relationship type in use. Without sprites there is no legend. |
+| `legend` | `true` | Write a legend of the sprites. It is left out when there are no sprites. |
+| `scale` | `1` | The `scale` line; `null` leaves it out. |
+| `layout` | `'left to right direction'` | The layout line; `null` leaves it out. |
+
+```typescript
+PlantKit.create('view', 'Layered View', { legend: false, sprites: false, layout: null, scale: null })
+  .addElement('customer', 'Business_Actor', 'Customer')
+  .generate();
+// @startuml view
+// !include <archimate/Archimate>
+// title Layered View
+// Business_Actor("ID_customer", "Customer")
+// @enduml
+```
+
+The low-level `Diagram` class takes the same options, except `include`, as a third constructor argument. It writes no include unless you add one.
 
 ### PlantUML Aliases
 

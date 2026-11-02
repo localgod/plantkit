@@ -33,4 +33,24 @@ describe.runIf(plantUmlAvailable)('Rendering generated output with PlantUML', ()
       }
     });
   });
+
+  it('renders the default facade output (stdlib include, sprites, legend) without addInclude (#244)', () => {
+    const svg = renderPlantUml(PlantKit.create('defaults', 'Defaults')
+      .addElement('g', 'Grouping', 'Group A')
+      .addElement('h', 'Group', 'Group B')
+      .addElement('d', 'Physical_DistributionNetwork', 'Network')
+      .addElement('a', 'Business_Actor', 'Actor')
+      .addChild('g', 'a')
+      .addRelation('a', 'd', 'Rel_Serving', 'uses')
+      .generate());
+    expect(svg).toContain('>Network<');
+  });
+
+  it('renders the clean output with legend, sprites, scale and layout off (#244)', () => {
+    renderPlantUml(PlantKit.create('clean', 'Clean', { legend: false, sprites: false, scale: null, layout: null })
+      .addElement('a', 'Business_Actor', 'A')
+      .addElement('b', 'Business_Process', 'B')
+      .addRelation('a', 'b', 'Rel_Triggering_Right', 'starts')
+      .generate());
+  });
 });

@@ -609,3 +609,55 @@ describe('Containers pass $nest (#245)', () => {
     expect(() => new PlantKit().toArchimate(kit.getElement('j')!)).toThrow('cannot contain other elements');
   });
 });
+
+describe('Standalone output (#244)', () => {
+  it('matches the expected clean output with legend and sprites off', () => {
+    const output = PlantKit.create('view', 'Layered View', { legend: false, sprites: false, layout: null, scale: null })
+      .addElement('E1', 'Business_Actor', 'Customer', { alias: 'E1' })
+      .addElement('E2', 'Business_Process', 'Order handling', { alias: 'E2' })
+      .addRelation('E1', 'E2', 'Rel_Triggering_Right', 'starts')
+      .generate();
+
+    expect(output).toBe([
+      '@startuml view',
+      '!include <archimate/Archimate>',
+      'title Layered View',
+      'Business_Actor("E1", "Customer")',
+      'Business_Process("E2", "Order handling")',
+      ' Rel_Triggering_Right("E1", "E2","starts")',
+      '@enduml',
+    ].join('\n'));
+  });
+
+  it('includes the Archimate stdlib by default, before user includes', () => {
+    const output = PlantKit.create('v', 'V').addInclude('theme.puml').generate();
+    expect(output.indexOf('!include <archimate/Archimate>')).toBeGreaterThan(-1);
+    expect(output.indexOf('!include <archimate/Archimate>')).toBeLessThan(output.indexOf('!include theme.puml'));
+  });
+
+  it('does not duplicate the stdlib include when the caller adds it too', () => {
+    const output = PlantKit.create('v', 'V').addInclude('<archimate/Archimate>').generate();
+    expect(output.match(/!include <archimate\/Archimate>/g)).toHaveLength(1);
+  });
+
+  it('can turn the stdlib include off at creation or later', () => {
+    expect(PlantKit.create('v', 'V', { include: false }).generate()).not.toContain('!include');
+    expect(PlantKit.create('v', 'V').setOptions({ include: false }).generate()).not.toContain('!include');
+    expect(PlantKit.create('v', 'V', { include: false }).setOptions({ include: true }).generate())
+      .toContain('!include <archimate/Archimate>');
+  });
+
+  it('keeps sprites, legend, scale and layout on by default', () => {
+    const output = PlantKit.create('v', 'V').addElement('a', 'Business_Actor', 'A').generate();
+    expect(output).toContain('sprite $Business_Actor_Sprite jar:archimate/business-actor');
+    expect(output).toContain('legend left');
+    expect(output).toContain('scale 1');
+    expect(output).toContain('left to right direction');
+  });
+
+  it('accepts null from setScale and setLayout', () => {
+    const output = PlantKit.create('v', 'V').setScale(null).setLayout(null).generate();
+    expect(output).not.toMatch(/^scale/m);
+    expect(output).not.toContain('direction');
+  });
+});
