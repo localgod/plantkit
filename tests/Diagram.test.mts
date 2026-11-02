@@ -10,8 +10,27 @@ describe('Diagram', () => {
 
     it('should create a new Diagram with a name and title', () => {
         const output = diagram.output();
-        expect(output).toContain('@startuml Test Diagram');
+        expect(output).toContain('@startuml Test_Diagram');
         expect(output).toContain('title Test Title');
+    });
+
+    it('escapes newlines and backslashes in the title', () => {
+        const output = new Diagram('view', 'Line one\nLine "two" \\ end').output();
+
+        expect(output).toContain('title Line one\\nLine "two" \\\\ end');
+        expect(output.split('\n').filter(line => line.startsWith('Line two'))).toHaveLength(0);
+    });
+
+    it('omits the title line when the title is empty', () => {
+        expect(new Diagram('view', '').output()).not.toMatch(/^title/m);
+    });
+
+    it('reduces the diagram name to a safe token', () => {
+        expect(new Diagram('my view\nx', 'T').output().split('\n')[0]).toBe('@startuml my_view_x');
+    });
+
+    it('omits the diagram name when nothing safe is left', () => {
+        expect(new Diagram(' \n ', 'T').output().split('\n')[0]).toBe('@startuml');
     });
 
     it('should set the scale of the diagram', () => {

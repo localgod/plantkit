@@ -1,3 +1,4 @@
+import { escapePlantUmlLine, toPlantUmlDiagramName } from './archimate/PlantUmlString.mjs';
 import { getArchimateSprite, isArchimateSpriteType, type ArchimateSpriteType } from './archimate/ArchimateSprite.mjs';
 
 interface Sprite {
@@ -50,11 +51,14 @@ class Diagram {
     }
     output(): string {
         const result: string[] = [];
-        result.push(`@startuml ${this.name}`);
+        const name = toPlantUmlDiagramName(this.name);
+        result.push(name ? `@startuml ${name}` : '@startuml');
         this.processIncludes(result);
         this.processSprites(result);
         result.push(`scale ${this.scale}`);
-        result.push(`title ${this.title}`);
+        if (this.title.trim()) {
+            result.push(`title ${escapePlantUmlLine(this.title)}`);
+        }
         result.push([...this.body, ...this.generatedBody].join('\n'));
         result.push(`${this.layout}`);
         this.addLegend(result);
