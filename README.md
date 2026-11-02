@@ -430,6 +430,14 @@ PlantKit generates production-ready PlantUML with:
 * ✅ **Scalable Output** - Configurable sizing and layout options
 * ✅ **Include Support** - Integration with external PlantUML themes and libraries
 
+## Runtimes
+
+PlantKit is runtime-neutral: it has no dependencies, imports nothing from Node, the DOM or the network, and only builds strings. It runs in Node, browsers, web workers and embedded JavaScript engines such as QuickJS, and bundles with esbuild's `platform: 'neutral'`. The package is marked `"sideEffects": false`, so bundlers can tree-shake it.
+
+The only host API it uses is `console.log`, in the `print*` debug helpers (`printNode`, `printArchimate`, `printRelations`, `printArchimateRelations`). The `to*` methods return the same text, so you don't need `print*` in an environment without `console`.
+
+CI keeps it this way: `npm run test:neutral` bundles `dist/index.mjs` for `platform: 'neutral'`, fails on any import from outside the package, and generates a diagram in a bare JavaScript context with no Node, DOM or `console` globals.
+
 ## TypeScript Support
 
 Full TypeScript support with:
