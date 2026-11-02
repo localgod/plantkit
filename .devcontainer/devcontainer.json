@@ -1,19 +1,22 @@
+// See https://aka.ms/devcontainer.json for the format.
 {
-	"name": "PlantKit",
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:latest",
-	"updateRemoteUserUID": true,
-	"postCreateCommand": "npm ci",
+	"name": "plantkit",
+		"image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	// Keep Claude Code's login, settings and project memory across container rebuilds.
+	"mounts": ["source=tsarchi-claude-config-${devcontainerId},target=/home/node/.claude,type=volume"],
+	"containerEnv": {
+		"CLAUDE_CONFIG_DIR": "/home/node/.claude"
+	},
+	"postCreateCommand": "sudo chown -R node:node /home/node/.claude && npm install --global @anthropic-ai/claude-code && npm ci",
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"jebbs.plantuml",
-				"GitHub.copilot",
-				"GitHub.copilot-chat",
-				"GitHub.vscode-github-actions",
-				"GitHub.vscode-pull-request-github",
-				"vitest.explorer",
-				"Anthropic.claude-code",
-				"usernamehw.errorlens"
+				"oxc.oxc-vscode",
+				"usernamehw.errorlens",
+				"medo64.render-crlf"
 			]
 		}
 	}
