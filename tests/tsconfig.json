@@ -1,0 +1,10 @@
+{
+  // Type-checking only (vp check and the pre-commit hook); nothing here is built.
+  // Extends the root config so these files get the same options, including Node types.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true
+  },
+  "include": ["**/*.mts", "**/*.mjs"]
+}
