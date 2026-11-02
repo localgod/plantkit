@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { PlantKit } from '../src/PlantKit.mjs';
 import { Element } from '../src/Element.mjs';
 
@@ -29,7 +29,25 @@ function decode(alias: string): string {
 }
 
 function randomId(random: () => number): string {
-  const alphabet = ['a', 'b', 'x', 'u', 'U', 'X', '0', '1', '_', '-', ' ', '.', 'é', '€', '😀', '"', '\n'];
+  const alphabet = [
+    'a',
+    'b',
+    'x',
+    'u',
+    'U',
+    'X',
+    '0',
+    '1',
+    '_',
+    '-',
+    ' ',
+    '.',
+    'é',
+    '€',
+    '😀',
+    '"',
+    '\n',
+  ];
   const length = Math.floor(random() * 8);
   return Array.from({ length }, () => alphabet[Math.floor(random() * alphabet.length)]).join('');
 }
@@ -94,6 +112,8 @@ describe('PlantKit.aliasOf', () => {
   });
 
   it('rejects an alias PlantUML cannot parse', () => {
-    expect(() => PlantKit.aliasOf(new Element('a', { alias: '1x' }))).toThrow('Invalid PlantUML alias for element a: 1x');
+    expect(() => PlantKit.aliasOf(new Element('a', { alias: '1x' }))).toThrow(
+      'Invalid PlantUML alias for element a: 1x',
+    );
   });
 });

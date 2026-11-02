@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vite-plus/test';
 import { PlantKit } from '../src/PlantKit.mjs';
 import { Element } from '../src/Element.mjs';
 import { ArchimateElement } from '../src/archimate/ArchimateElement.mjs';
@@ -11,7 +11,7 @@ describe('PlantKit', () => {
 
   beforeEach(() => {
     plantKit = new PlantKit();
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -37,7 +37,7 @@ describe('PlantKit', () => {
       it('adds an element and returns this for chaining', () => {
         const kit = PlantKit.create('test', 'Test');
         const result = kit.addElement('customer', 'Business_Actor', 'Customer');
-        
+
         expect(result).toBe(kit);
         const element = kit.getElement('customer');
         expect(element).toBeInstanceOf(Element);
@@ -49,14 +49,14 @@ describe('PlantKit', () => {
       it('adds element to internal graph', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
-        
+
         expect(kit.graph.getNodes()).toHaveLength(1);
       });
 
       it('stores element in internal map', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('customer', 'Business_Actor', 'Customer');
-        
+
         const retrieved = kit.getElement('customer');
         expect(retrieved).toBeDefined();
         expect(retrieved?.getName()).toBe('customer');
@@ -66,8 +66,9 @@ describe('PlantKit', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('customer', 'Business_Actor', 'Customer');
 
-        expect(() => kit.addElement('customer', 'Business_Role', 'Customer role'))
-          .toThrow('Duplicate element id: customer');
+        expect(() => kit.addElement('customer', 'Business_Role', 'Customer role')).toThrow(
+          'Duplicate element id: customer',
+        );
         expect(kit.graph.getNodes()).toHaveLength(1);
       });
 
@@ -98,19 +99,24 @@ describe('PlantKit', () => {
       });
 
       it('rejects a caller-supplied alias that is already in use', () => {
-        const kit = PlantKit.create('test', 'Test')
-          .addElement('customer', 'Business_Actor', 'Customer');
+        const kit = PlantKit.create('test', 'Test').addElement(
+          'customer',
+          'Business_Actor',
+          'Customer',
+        );
 
-        expect(() => kit.addElement('other', 'Business_Actor', 'Other', { alias: 'ID_customer' }))
-          .toThrow('Duplicate PlantUML element alias: ID_customer (already used by customer)');
+        expect(() =>
+          kit.addElement('other', 'Business_Actor', 'Other', { alias: 'ID_customer' }),
+        ).toThrow('Duplicate PlantUML element alias: ID_customer (already used by customer)');
         expect(kit.getElement('other')).toBeUndefined();
       });
 
       it('rejects an invalid caller-supplied alias', () => {
         const kit = PlantKit.create('test', 'Test');
 
-        expect(() => kit.addElement('a', 'Business_Actor', 'A', { alias: 'has space' }))
-          .toThrow('Invalid PlantUML alias for element a: has space');
+        expect(() => kit.addElement('a', 'Business_Actor', 'A', { alias: 'has space' })).toThrow(
+          'Invalid PlantUML alias for element a: has space',
+        );
       });
 
       it('reports aliases that collide after an element is changed', () => {
@@ -119,26 +125,29 @@ describe('PlantKit', () => {
           .addElement('b', 'Business_Actor', 'B');
         kit.getElement('b')!.getProperties()['alias'] = 'ID_a';
 
-        expect(kit.validate()).toEqual([{
-          code: 'ELEMENT_ALIAS_DUPLICATE',
-          message: 'Elements a and b share the PlantUML alias ID_a',
-        }]);
+        expect(kit.validate()).toEqual([
+          {
+            code: 'ELEMENT_ALIAS_DUPLICATE',
+            message: 'Elements a and b share the PlantUML alias ID_a',
+          },
+        ]);
       });
 
       it('rejects an unknown element type', () => {
         const kit = PlantKit.create('test', 'Test');
 
-        expect(() => kit.addElement('customer', 'Unknown_Type' as never, 'Customer'))
-          .toThrow('Unknown ArchiMate element type: Unknown_Type');
+        expect(() => kit.addElement('customer', 'Unknown_Type' as never, 'Customer')).toThrow(
+          'Unknown ArchiMate element type: Unknown_Type',
+        );
       });
 
       it('supports additional properties', () => {
         const kit = PlantKit.create('test', 'Test');
-        kit.addElement('db', 'Technology_Node', 'Database', { 
+        kit.addElement('db', 'Technology_Node', 'Database', {
           technology: 'PostgreSQL',
-          version: '14.0'
+          version: '14.0',
         });
-        
+
         const element = kit.getElement('db');
         expect(element?.getProperties()['technology']).toBe('PostgreSQL');
         expect(element?.getProperties()['version']).toBe('14.0');
@@ -147,9 +156,11 @@ describe('PlantKit', () => {
       it('rejects properties that override the validated type or label', () => {
         const kit = PlantKit.create('test', 'Test');
 
-        expect(() => kit.addElement('db', 'Technology_Node', 'Database', {
-          type: 'Unknown_Type',
-        })).toThrow('Element properties cannot override type or label');
+        expect(() =>
+          kit.addElement('db', 'Technology_Node', 'Database', {
+            type: 'Unknown_Type',
+          }),
+        ).toThrow('Element properties cannot override type or label');
       });
     });
 
@@ -158,9 +169,9 @@ describe('PlantKit', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor 1');
         kit.addElement('e2', 'Business_Process', 'Process 1');
-        
+
         kit.addRelation('e1', 'e2', 'Rel_Triggering', 'initiates');
-        
+
         const relations = kit.graph.getRelations();
         expect(relations).toHaveLength(1);
         expect(relations[0].type).toBe('Rel_Triggering');
@@ -170,7 +181,7 @@ describe('PlantKit', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
         kit.addElement('e2', 'Business_Process', 'Process');
-        
+
         const result = kit.addRelation('e1', 'e2', 'Rel_Flow');
         expect(result).toBe(kit);
       });
@@ -178,17 +189,15 @@ describe('PlantKit', () => {
       it('throws error if source element not found', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e2', 'Business_Process', 'Process');
-        
-        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow'))
-          .toThrow('Element not found: e1');
+
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow')).toThrow('Element not found: e1');
       });
 
       it('throws error if target element not found', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
-        
-        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow'))
-          .toThrow('Element not found: e2');
+
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Flow')).toThrow('Element not found: e2');
       });
 
       it('rejects an unknown relationship type', () => {
@@ -196,8 +205,9 @@ describe('PlantKit', () => {
         kit.addElement('e1', 'Business_Actor', 'Actor');
         kit.addElement('e2', 'Business_Process', 'Process');
 
-        expect(() => kit.addRelation('e1', 'e2', 'Rel_Unknown' as never))
-          .toThrow('Unknown ArchiMate relationship type: Rel_Unknown');
+        expect(() => kit.addRelation('e1', 'e2', 'Rel_Unknown' as never)).toThrow(
+          'Unknown ArchiMate relationship type: Rel_Unknown',
+        );
       });
     });
 
@@ -207,7 +217,7 @@ describe('PlantKit', () => {
           .setScale(1.5)
           .setLayout('top to bottom direction')
           .addInclude('./test.puml');
-        
+
         expect(kit).toBeInstanceOf(PlantKit);
       });
 
@@ -217,7 +227,7 @@ describe('PlantKit', () => {
           .addElement('e2', 'Business_Process', 'Process')
           .addRelation('e1', 'e2', 'Rel_Triggering', 'initiates')
           .generate();
-        
+
         expect(output).toContain('@startuml test');
         expect(output).toContain('Business_Actor');
         expect(output).toContain('Business_Process');
@@ -227,33 +237,39 @@ describe('PlantKit', () => {
     describe('generate', () => {
       it('reports graph nodes that are not managed by the facade', () => {
         const kit = PlantKit.create('test', 'Test');
-        kit.graph.addNode(new Element('orphan', {
-          type: 'Business_Actor',
-          label: 'Orphan',
-        }));
+        kit.graph.addNode(
+          new Element('orphan', {
+            type: 'Business_Actor',
+            label: 'Orphan',
+          }),
+        );
 
-        expect(kit.validate()).toEqual([{
-          code: 'GRAPH_NODE_UNMANAGED',
-          message: 'Graph node orphan is not managed by this PlantKit instance',
-        }]);
-        expect(() => kit.generate()).toThrow('Invalid ArchiMate model:\nGraph node orphan is not managed by this PlantKit instance');
+        expect(kit.validate()).toEqual([
+          {
+            code: 'GRAPH_NODE_UNMANAGED',
+            message: 'Graph node orphan is not managed by this PlantKit instance',
+          },
+        ]);
+        expect(() => kit.generate()).toThrow(
+          'Invalid ArchiMate model:\nGraph node orphan is not managed by this PlantKit instance',
+        );
       });
 
       it('reports graph mutations that make the model invalid before rendering', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
         kit.addElement('e2', 'Business_Process', 'Process');
-        kit.graph.addRelation(
-          kit.getElement('e1')!,
-          kit.getElement('e2')!,
-          'Rel_Unknown',
-        );
+        kit.graph.addRelation(kit.getElement('e1')!, kit.getElement('e2')!, 'Rel_Unknown');
 
-        expect(kit.validate()).toEqual([{
-          code: 'RELATION_TYPE_UNKNOWN',
-          message: 'Relationship has unknown ArchiMate type: Rel_Unknown',
-        }]);
-        expect(() => kit.generate()).toThrow('Invalid ArchiMate model:\nRelationship has unknown ArchiMate type: Rel_Unknown');
+        expect(kit.validate()).toEqual([
+          {
+            code: 'RELATION_TYPE_UNKNOWN',
+            message: 'Relationship has unknown ArchiMate type: Rel_Unknown',
+          },
+        ]);
+        expect(() => kit.generate()).toThrow(
+          'Invalid ArchiMate model:\nRelationship has unknown ArchiMate type: Rel_Unknown',
+        );
       });
 
       it('generates complete PlantUML output', () => {
@@ -262,7 +278,7 @@ describe('PlantKit', () => {
           .addElement('orderProcess', 'Business_Process', 'Order Processing')
           .addRelation('customer', 'orderProcess', 'Rel_Triggering', 'initiates')
           .generate();
-        
+
         expect(output).toContain('@startuml business-model');
         expect(output).toContain('title Business Model');
         expect(output).toContain('Business_Actor("ID_customer", "Customer")');
@@ -272,8 +288,11 @@ describe('PlantKit', () => {
       });
 
       it('does not duplicate generated content when called repeatedly', () => {
-        const kit = PlantKit.create('test', 'Test')
-          .addElement('customer', 'Business_Actor', 'Customer');
+        const kit = PlantKit.create('test', 'Test').addElement(
+          'customer',
+          'Business_Actor',
+          'Customer',
+        );
 
         kit.generate();
         const output = kit.generate();
@@ -285,12 +304,9 @@ describe('PlantKit', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
         kit.addElement('e2', 'Business_Process', 'Process');
-        kit.graph.addRelation(
-          kit.getElement('e1')!,
-          kit.getElement('e2')!,
-          'Rel_Flow',
-          { metadata: 'value' },
-        );
+        kit.graph.addRelation(kit.getElement('e1')!, kit.getElement('e2')!, 'Rel_Flow', {
+          metadata: 'value',
+        });
 
         expect(kit.generate()).toContain('Rel_Flow("ID_e1", "ID_e2","")');
       });
@@ -299,7 +315,7 @@ describe('PlantKit', () => {
         const output = PlantKit.create('test', 'Test')
           .addElement('e1', 'Business_Actor', 'Actor')
           .generate();
-        
+
         expect(output).toContain('sprite $Business_Actor_Sprite');
       });
     });
@@ -308,7 +324,7 @@ describe('PlantKit', () => {
       it('provides access to underlying diagram', () => {
         const kit = PlantKit.create('test', 'Test');
         expect(kit.diagram).toBeDefined();
-        
+
         kit.diagram.setScale(2.0);
         const output = kit.generate();
         expect(output).toContain('scale 2');
@@ -319,7 +335,7 @@ describe('PlantKit', () => {
       it('provides access to underlying graph', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('e1', 'Business_Actor', 'Actor');
-        
+
         expect(kit.graph).toBeDefined();
         expect(kit.graph.getNodes()).toHaveLength(1);
       });
@@ -329,7 +345,7 @@ describe('PlantKit', () => {
       it('retrieves element by id', () => {
         const kit = PlantKit.create('test', 'Test');
         kit.addElement('customer', 'Business_Actor', 'Customer');
-        
+
         const element = kit.getElement('customer');
         expect(element).toBeDefined();
         expect(element?.getName()).toBe('customer');
@@ -342,7 +358,6 @@ describe('PlantKit', () => {
       });
     });
   });
-
 
   describe('printNode', () => {
     it('prints hierarchical node tree correctly', () => {
@@ -416,7 +431,9 @@ describe('PlantKit', () => {
 
       nodeGraph.addRelation(root, child1, ArchimateRelation.type.Rel_Flow, { label: 'Access' });
       nodeGraph.addRelation(root, child2, ArchimateRelation.type.Rel_Flow, { label: 'Access' });
-      nodeGraph.addRelation(child1, grandchild, ArchimateRelation.type.Rel_Access, { label: 'Access' });
+      nodeGraph.addRelation(child1, grandchild, ArchimateRelation.type.Rel_Access, {
+        label: 'Access',
+      });
     });
 
     it('prints Archimate relations correctly', () => {
@@ -424,19 +441,31 @@ describe('PlantKit', () => {
 
       expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_Root", "ID_Child_x201","Access")');
       expect(consoleSpy).toHaveBeenCalledWith('  Rel_Flow("ID_Root", "ID_Child_x202","Access")');
-      expect(consoleSpy).toHaveBeenCalledWith('  Rel_Access("ID_Child_x201", "ID_Grandchild","Access")');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '  Rel_Access("ID_Child_x201", "ID_Grandchild","Access")',
+      );
     });
 
     it('prints Archimate node structure with children', () => {
       plantKit.printArchimate(root);
 
-      expect(consoleSpy).toHaveBeenCalledWith('Application_Collaboration("ID_Root", "<b>Root</b>", 1) {');
-      expect(consoleSpy).toHaveBeenCalledWith('  Application_Component("ID_Child_x201", "<b>Child 1</b>", 1) {');
-      expect(consoleSpy).toHaveBeenCalledWith('    Motivation_Constraint("ID_Grandchild", "<b>Grandchild</b>", 1) {');
-      expect(consoleSpy).toHaveBeenCalledWith('      Motivation_Constraint("ID_jonny", "<b>Grandchild</b>")');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Application_Collaboration("ID_Root", "<b>Root</b>", 1) {',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '  Application_Component("ID_Child_x201", "<b>Child 1</b>", 1) {',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '    Motivation_Constraint("ID_Grandchild", "<b>Grandchild</b>", 1) {',
+      );
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '      Motivation_Constraint("ID_jonny", "<b>Grandchild</b>")',
+      );
       expect(consoleSpy).toHaveBeenCalledWith('    }');
       expect(consoleSpy).toHaveBeenCalledWith('  }');
-      expect(consoleSpy).toHaveBeenCalledWith('  Application_Interface("ID_Child_x202", "<b>Child 2</b>")');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        '  Application_Interface("ID_Child_x202", "<b>Child 2</b>")',
+      );
       expect(consoleSpy).toHaveBeenCalledWith('}');
     });
   });
@@ -462,7 +491,7 @@ describe('printNode', () => {
   beforeEach(() => {
     plantKit = new PlantKit();
     node = new Element('Test Node');
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { });
+    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -470,7 +499,6 @@ describe('printNode', () => {
   });
 
   it('should print a node with no children', () => {
-
     plantKit.printNode(node);
     expect(consoleSpy).toHaveBeenCalledTimes(1);
     expect(consoleSpy).toHaveBeenCalledWith('Test Node');
@@ -482,7 +510,6 @@ describe('printNode', () => {
     node.addChild(child1);
     node.addChild(child2);
 
-
     plantKit.printNode(node);
     expect(consoleSpy).toHaveBeenCalledTimes(4);
     expect(consoleSpy).toHaveBeenNthCalledWith(1, 'Test Node {');
@@ -492,10 +519,11 @@ describe('printNode', () => {
 });
 
 describe('Hierarchies (#241)', () => {
-  const kit = () => PlantKit.create('n', 'N')
-    .addElement('p', 'Grouping', 'P')
-    .addElement('c', 'Business_Actor', 'C')
-    .addElement('g', 'Business_Role', 'G');
+  const kit = () =>
+    PlantKit.create('n', 'N')
+      .addElement('p', 'Grouping', 'P')
+      .addElement('c', 'Business_Actor', 'C')
+      .addElement('g', 'Business_Role', 'G');
 
   it('emits a child attached through getElement().addChild() only once', () => {
     const k = kit();
@@ -511,7 +539,9 @@ describe('Hierarchies (#241)', () => {
 
     expect(output.match(/Business_Role\("ID_g", "G"\)/g)).toHaveLength(1);
     expect(output.match(/Business_Actor\("ID_c", "C", 1\)/g)).toHaveLength(1);
-    expect(output).toContain('Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C", 1) {\n    Business_Role("ID_g", "G")\n  }\n}');
+    expect(output).toContain(
+      'Grouping("ID_p", "P") {\n  Business_Actor("ID_c", "C", 1) {\n    Business_Role("ID_g", "G")\n  }\n}',
+    );
   });
 
   it('keeps top-level elements in registration order', () => {
@@ -543,7 +573,7 @@ describe('Hierarchies (#241)', () => {
     k.getElement('p')!.addChild(k.getElement('c')!);
     k.getElement('c')!.addChild(k.getElement('p')!);
 
-    expect(k.validate().map(d => d.code)).toContain('ELEMENT_HIERARCHY_CYCLE');
+    expect(k.validate().map((d) => d.code)).toContain('ELEMENT_HIERARCHY_CYCLE');
     expect(() => k.generate()).toThrow('is nested inside itself');
   });
 
@@ -552,10 +582,12 @@ describe('Hierarchies (#241)', () => {
     k.getElement('p')!.addChild(k.getElement('c')!);
     k.getElement('g')!.addChild(k.getElement('c')!);
 
-    expect(k.validate()).toEqual([{
-      code: 'ELEMENT_MULTIPLE_PARENTS',
-      message: 'Element c has more than one parent: p, g',
-    }]);
+    expect(k.validate()).toEqual([
+      {
+        code: 'ELEMENT_MULTIPLE_PARENTS',
+        message: 'Element c has more than one parent: p, g',
+      },
+    ]);
   });
 
   it('toArchimate throws on a cycle instead of overflowing the stack', () => {
@@ -580,7 +612,9 @@ describe('Containers pass $nest (#245)', () => {
       .generate();
 
     expect(output).toContain('Business_Actor("ID_a", "A", 1) {\n  Business_Role("ID_r", "R")\n}');
-    expect(output).toContain('Business_Service("ID_s", "S", 1) {\n  Business_Process("ID_p", "P")\n}');
+    expect(output).toContain(
+      'Business_Service("ID_s", "S", 1) {\n  Business_Process("ID_p", "P")\n}',
+    );
   });
 
   it('does not pass $nest to procedures that do not take it', () => {
@@ -602,37 +636,50 @@ describe('Containers pass $nest (#245)', () => {
       .addElement('j', 'Junction_And', 'J')
       .addElement('o', 'Business_Object', 'O');
 
-    expect(() => kit.addChild('j', 'o')).toThrow('Element j of type Junction_And cannot contain other elements');
+    expect(() => kit.addChild('j', 'o')).toThrow(
+      'Element j of type Junction_And cannot contain other elements',
+    );
 
     kit.getElement('j')!.addChild(kit.getElement('o')!);
-    expect(kit.validate().map(d => d.code)).toEqual(['ELEMENT_CANNOT_CONTAIN']);
-    expect(() => new PlantKit().toArchimate(kit.getElement('j')!)).toThrow('cannot contain other elements');
+    expect(kit.validate().map((d) => d.code)).toEqual(['ELEMENT_CANNOT_CONTAIN']);
+    expect(() => new PlantKit().toArchimate(kit.getElement('j')!)).toThrow(
+      'cannot contain other elements',
+    );
   });
 });
 
 describe('Standalone output (#244)', () => {
   it('matches the expected clean output with legend and sprites off', () => {
-    const output = PlantKit.create('view', 'Layered View', { legend: false, sprites: false, layout: null, scale: null })
+    const output = PlantKit.create('view', 'Layered View', {
+      legend: false,
+      sprites: false,
+      layout: null,
+      scale: null,
+    })
       .addElement('E1', 'Business_Actor', 'Customer', { alias: 'E1' })
       .addElement('E2', 'Business_Process', 'Order handling', { alias: 'E2' })
       .addRelation('E1', 'E2', 'Rel_Triggering_Right', 'starts')
       .generate();
 
-    expect(output).toBe([
-      '@startuml view',
-      '!include <archimate/Archimate>',
-      'title Layered View',
-      'Business_Actor("E1", "Customer")',
-      'Business_Process("E2", "Order handling")',
-      ' Rel_Triggering_Right("E1", "E2","starts")',
-      '@enduml',
-    ].join('\n'));
+    expect(output).toBe(
+      [
+        '@startuml view',
+        '!include <archimate/Archimate>',
+        'title Layered View',
+        'Business_Actor("E1", "Customer")',
+        'Business_Process("E2", "Order handling")',
+        ' Rel_Triggering_Right("E1", "E2","starts")',
+        '@enduml',
+      ].join('\n'),
+    );
   });
 
   it('includes the Archimate stdlib by default, before user includes', () => {
     const output = PlantKit.create('v', 'V').addInclude('theme.puml').generate();
     expect(output.indexOf('!include <archimate/Archimate>')).toBeGreaterThan(-1);
-    expect(output.indexOf('!include <archimate/Archimate>')).toBeLessThan(output.indexOf('!include theme.puml'));
+    expect(output.indexOf('!include <archimate/Archimate>')).toBeLessThan(
+      output.indexOf('!include theme.puml'),
+    );
   });
 
   it('does not duplicate the stdlib include when the caller adds it too', () => {
@@ -642,9 +689,12 @@ describe('Standalone output (#244)', () => {
 
   it('can turn the stdlib include off at creation or later', () => {
     expect(PlantKit.create('v', 'V', { include: false }).generate()).not.toContain('!include');
-    expect(PlantKit.create('v', 'V').setOptions({ include: false }).generate()).not.toContain('!include');
-    expect(PlantKit.create('v', 'V', { include: false }).setOptions({ include: true }).generate())
-      .toContain('!include <archimate/Archimate>');
+    expect(PlantKit.create('v', 'V').setOptions({ include: false }).generate()).not.toContain(
+      '!include',
+    );
+    expect(
+      PlantKit.create('v', 'V', { include: false }).setOptions({ include: true }).generate(),
+    ).toContain('!include <archimate/Archimate>');
   });
 
   it('keeps sprites, legend, scale and layout on by default', () => {
@@ -663,16 +713,21 @@ describe('Standalone output (#244)', () => {
 });
 
 describe('Notes (#248)', () => {
-  const base = () => PlantKit.create('n', 'N', { sprites: false, scale: null, layout: null })
-    .addElement('orderProcess', 'Business_Process', 'Order process')
-    .addElement('payments', 'Grouping', 'Payments');
+  const base = () =>
+    PlantKit.create('n', 'N', { sprites: false, scale: null, layout: null })
+      .addElement('orderProcess', 'Business_Process', 'Order process')
+      .addElement('payments', 'Grouping', 'Payments');
 
   it('writes an attached note and its connector after the elements', () => {
-    const output = base().addNote('n1', 'Owned by the\npayments team', { attachTo: 'orderProcess' }).generate();
+    const output = base()
+      .addNote('n1', 'Owned by the\npayments team', { attachTo: 'orderProcess' })
+      .generate();
 
     expect(output).toContain('note "Owned by the\\npayments team" as ID_n1');
     expect(output).toContain('ID_n1 .. ID_orderProcess');
-    expect(output.indexOf('ID_n1 .. ID_orderProcess')).toBeGreaterThan(output.indexOf('Grouping("ID_payments"'));
+    expect(output.indexOf('ID_n1 .. ID_orderProcess')).toBeGreaterThan(
+      output.indexOf('Grouping("ID_payments"'),
+    );
   });
 
   it('writes a stand-alone note without a connector', () => {
@@ -683,7 +738,9 @@ describe('Notes (#248)', () => {
   });
 
   it('attaches a note to several elements', () => {
-    const output = base().addNote('n1', 'Both', { attachTo: ['orderProcess', 'payments'] }).generate();
+    const output = base()
+      .addNote('n1', 'Both', { attachTo: ['orderProcess', 'payments'] })
+      .generate();
 
     expect(output).toContain('ID_n1 .. ID_orderProcess');
     expect(output).toContain('ID_n1 .. ID_payments');
@@ -703,23 +760,33 @@ describe('Notes (#248)', () => {
   });
 
   it('honours an explicit alias', () => {
-    const output = base().addNote('n1', 'Aliased', { attachTo: 'orderProcess' }, { alias: 'N1' }).generate();
+    const output = base()
+      .addNote('n1', 'Aliased', { attachTo: 'orderProcess' }, { alias: 'N1' })
+      .generate();
 
     expect(output).toContain('note "Aliased" as N1');
     expect(output).toContain('N1 .. ID_orderProcess');
   });
 
   it('rejects an unknown attachTo target, a duplicate id and a duplicate alias', () => {
-    expect(() => base().addNote('n1', 'x', { attachTo: 'nope' })).toThrow('Element not found: nope');
+    expect(() => base().addNote('n1', 'x', { attachTo: 'nope' })).toThrow(
+      'Element not found: nope',
+    );
     expect(() => base().addNote('orderProcess', 'x')).toThrow('Duplicate element id: orderProcess');
-    expect(() => base().addNote('n1', 'x', {}, { alias: 'ID_payments' })).toThrow('Duplicate PlantUML element alias: ID_payments');
+    expect(() => base().addNote('n1', 'x', {}, { alias: 'ID_payments' })).toThrow(
+      'Duplicate PlantUML element alias: ID_payments',
+    );
   });
 
   it('a note cannot contain elements or be a relationship endpoint', () => {
     const kit = base().addNote('n1', 'x');
 
-    expect(() => kit.addChild('n1', 'orderProcess')).toThrow('Element n1 of type Note cannot contain other elements');
-    expect(() => kit.addRelation('n1', 'orderProcess', 'Rel_Flow')).toThrow('Notes cannot be relationship endpoints');
+    expect(() => kit.addChild('n1', 'orderProcess')).toThrow(
+      'Element n1 of type Note cannot contain other elements',
+    );
+    expect(() => kit.addRelation('n1', 'orderProcess', 'Rel_Flow')).toThrow(
+      'Notes cannot be relationship endpoints',
+    );
   });
 
   it('validates and writes no sprite for notes', () => {
@@ -733,6 +800,8 @@ describe('Notes (#248)', () => {
     const group = new Element('g', { type: 'Grouping', label: 'G' });
     group.addChild(new Element('n', { type: 'Note', label: 'Hello' }));
 
-    expect(new PlantKit().toArchimate(group)).toBe('Grouping("ID_g", "G") {\n  note "Hello" as ID_n\n}');
+    expect(new PlantKit().toArchimate(group)).toBe(
+      'Grouping("ID_g", "G") {\n  note "Hello" as ID_n\n}',
+    );
   });
 });

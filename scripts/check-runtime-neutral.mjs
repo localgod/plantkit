@@ -23,8 +23,10 @@ const neutralOptions = {
 
 // 1. ESM bundle: every input must be a file inside the package.
 const esm = await build({ ...neutralOptions, format: 'esm' });
-const imports = Object.values(esm.metafile.inputs).flatMap(input => input.imports);
-const external = imports.filter(imported => imported.external || !imported.path.startsWith('dist/'));
+const imports = Object.values(esm.metafile.inputs).flatMap((input) => input.imports);
+const external = imports.filter(
+  (imported) => imported.external || !imported.path.startsWith('dist/'),
+);
 if (external.length > 0) {
   console.error('The package imports modules outside itself:');
   for (const imported of external) console.error(`  ${imported.path}`);
@@ -36,7 +38,8 @@ const bytes = esm.outputFiles[0].contents.length;
 const iife = await build({ ...neutralOptions, format: 'iife', globalName: 'plantkit' });
 const context = vm.createContext({});
 vm.runInContext(iife.outputFiles[0].text, context);
-const output = vm.runInContext(`
+const output = vm.runInContext(
+  `
   const { PlantKit, Diagram, Element, ElementGraph } = plantkit;
   const kit = PlantKit.create('neutral', 'Runtime "neutral"\\ncheck')
     .addElement('id-AB', 'Grouping', 'Group')
@@ -49,9 +52,16 @@ const output = vm.runInContext(`
   low.addToBody(new PlantKit().toArchimate(new Element('x', { type: 'Business_Object', label: 'X' })));
   const graph = new ElementGraph();
   kit.generate() + '\\n' + low.output() + '\\n' + graph.getNodes().length;
-`, context);
+`,
+  context,
+);
 
-for (const expected of ['@startuml neutral', 'Grouping("ID_id_x2dAB", "Group") {', 'Rel_Triggering("E1", "ID_p","starts")', '@startuml low']) {
+for (const expected of [
+  '@startuml neutral',
+  'Grouping("ID_id_x2dAB", "Group") {',
+  'Rel_Triggering("E1", "ID_p","starts")',
+  '@startuml low',
+]) {
   if (!output.includes(expected)) {
     console.error(`Generated output inside the bare context is missing: ${expected}\n${output}`);
     process.exit(1);
@@ -61,6 +71,10 @@ for (const expected of ['@startuml neutral', 'Grouping("ID_id_x2dAB", "Group") {
 // `console` is only meant for the PlantKit#print* debug helpers; the run above
 // proves generation never touches it.
 const consoleUses = esm.outputFiles[0].text.match(/\bconsole\.\w+/g) ?? [];
-console.log(`ok: ${entry} bundles for platform 'neutral' with no external imports (${bytes} bytes)`);
+console.log(
+  `ok: ${entry} bundles for platform 'neutral' with no external imports (${bytes} bytes)`,
+);
 console.log(`ok: generates PlantUML in a context without Node, DOM or console globals`);
-console.log(`info: the bundle has ${consoleUses.length} console calls (the PlantKit#print* debug helpers)`);
+console.log(
+  `info: the bundle has ${consoleUses.length} console calls (the PlantKit#print* debug helpers)`,
+);

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { ARCHIMATE_VERSION } from '../src/archimate/ArchimateVersion.mjs';
 
 describe('ArchimateVersion', () => {

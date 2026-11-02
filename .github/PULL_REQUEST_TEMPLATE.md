@@ -36,7 +36,7 @@ Relates to #
 - [ ] All existing tests pass (`npm test`)
 - [ ] Added new tests for new functionality
 - [ ] Tested locally with `npm run build`
-- [ ] Linting passes (`npm run lint` and `npm run mdlint`)
+- [ ] Checks pass (`npm run check` and `npm run mdlint`)
 
 ### Test Coverage
 

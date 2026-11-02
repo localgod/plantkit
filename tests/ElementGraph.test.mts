@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vite-plus/test';
 import { Element } from '../src/Element.mjs';
 import { ElementGraph } from '../src/ElementGraph.mjs';
 
@@ -29,7 +29,9 @@ describe('ElementGraph', () => {
 
   it('should throw an error when adding a relation with a node that is not part of the graph', () => {
     const node4 = new Element('Node 4');
-    expect(() => elementGraph.addRelation(node1, node4, 'relation type')).toThrowError('Both nodes must be part of the graph before adding a relation.');
+    expect(() => elementGraph.addRelation(node1, node4, 'relation type')).toThrowError(
+      'Both nodes must be part of the graph before adding a relation.',
+    );
   });
 
   it('should not throw an error when adding a relation with both nodes in the graph', () => {
@@ -46,15 +48,31 @@ describe('ElementGraph', () => {
     it('should return outgoing relations for a node', () => {
       const outgoingRelations = elementGraph.getOutgoingRelations(node1);
       expect(outgoingRelations.length).toBe(2);
-      expect(outgoingRelations).toContainEqual({ source: node1, target: node2, type: 'relation type 1' });
-      expect(outgoingRelations).toContainEqual({ source: node1, target: node3, type: 'relation type 3' });
+      expect(outgoingRelations).toContainEqual({
+        source: node1,
+        target: node2,
+        type: 'relation type 1',
+      });
+      expect(outgoingRelations).toContainEqual({
+        source: node1,
+        target: node3,
+        type: 'relation type 3',
+      });
     });
 
     it('should return incoming relations for a node', () => {
       const incomingRelations = elementGraph.getIncomingRelations(node3);
       expect(incomingRelations.length).toBe(2);
-      expect(incomingRelations).toContainEqual({ source: node1, target: node3, type: 'relation type 3' });
-      expect(incomingRelations).toContainEqual({ source: node2, target: node3, type: 'relation type 2' });
+      expect(incomingRelations).toContainEqual({
+        source: node1,
+        target: node3,
+        type: 'relation type 3',
+      });
+      expect(incomingRelations).toContainEqual({
+        source: node2,
+        target: node3,
+        type: 'relation type 2',
+      });
     });
 
     it('should return connected nodes for a node', () => {

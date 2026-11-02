@@ -1,5 +1,9 @@
-import { describe, expect, it } from 'vitest';
-import { escapePlantUmlLine, escapePlantUmlString, toPlantUmlDiagramName } from '../src/archimate/PlantUmlString.mjs';
+import { describe, expect, it } from 'vite-plus/test';
+import {
+  escapePlantUmlLine,
+  escapePlantUmlString,
+  toPlantUmlDiagramName,
+} from '../src/archimate/PlantUmlString.mjs';
 
 describe('PlantUmlString', () => {
   it('escapes quotes as <U+0022>, backslashes and every newline style in strings', () => {
