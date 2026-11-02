@@ -54,6 +54,13 @@ function buildKit(options: Record<string, unknown> = {}) {
       .addElement(target, 'Application_Component', `dst ${index}`)
       .addRelation(source, target, type, `${type}\n${trickyLabels[index % trickyLabels.length]}`);
   });
+  // Notes: attached to one and to several elements, stand-alone, and nested in a group.
+  kit.addNote('note-attached', 'Owned by the\npayments "team"', { attachTo: 'id-AB' })
+    .addNote('note-multi', 'Shared note', { attachTo: ['id-ab', 'id_ab'] })
+    .addNote('note-alone', trickyLabels.join('\n'))
+    .addNote('note-nested', 'Inside a group')
+    .addChild('el-Group', 'note-nested');
+
   kit.addRelation('id-AB', 'id-ab', 'Rel_Association', 'distinct aliases')
     .addRelation('id-ab', 'id_ab', 'Rel_Association', 'distinct aliases');
 

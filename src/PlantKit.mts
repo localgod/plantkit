@@ -1,6 +1,7 @@
 import { Element } from './Element.mjs';
 import { ArchimateElement, canContainElements, isArchimateElementType, type ArchimateElementType } from './archimate/ArchimateElement.mjs';
 import { ArchimateRelation, isArchimateRelationType, type ArchimateRelationType } from './archimate/ArchimateRelation.mjs';
+import { ArchimateNote, ArchimateNoteLink, NOTE_TYPE } from './archimate/ArchimateNote.mjs';
 import { ElementGraph } from './ElementGraph.mjs';
 import { Diagram, type DiagramOptions } from './Diagram.mjs';
 
@@ -15,6 +16,11 @@ export interface PlantKitOptions extends DiagramOptions {
     include?: boolean;
 }
 
+export interface NoteOptions {
+    /** Id(s) of the element(s) the note is connected to with a dotted line. */
+    attachTo?: string | string[];
+}
+
 export interface ValidationDiagnostic {
     code: 'ELEMENT_TYPE_MISSING' | 'ELEMENT_TYPE_UNKNOWN' | 'ELEMENT_ALIAS_INVALID' | 'ELEMENT_ALIAS_DUPLICATE' | 'ELEMENT_HIERARCHY_CYCLE' | 'ELEMENT_MULTIPLE_PARENTS' | 'ELEMENT_CANNOT_CONTAIN' | 'GRAPH_NODE_UNMANAGED' | 'RELATION_TYPE_UNKNOWN' | 'RELATION_ENDPOINT_UNKNOWN';
     message: string;
@@ -25,6 +31,7 @@ class PlantKit {
     private graphInstance?: ElementGraph;
     private elements?: Map<string, Element>;
     private readonly aliases = new Map<string, string>();
+    private readonly noteLinks: Array<{ note: Element; target: Element }> = [];
 
     constructor(name?: string, title?: string, options: PlantKitOptions = {}) {
         if (name !== undefined && title !== undefined) {
@@ -58,15 +65,55 @@ class PlantKit {
             throw new Error('Element properties cannot override type or label');
         }
         const element = new Element(id, { type, label, ...properties });
+        this.register(element);
+        this.graphInstance.addNode(element);
+        return this;
+    }
+
+    /**
+     * Adds a note. The text is escaped like labels (newlines become line
+     * breaks). With `attachTo`, the note is connected to those elements by a
+     * dotted line; without it, the note stands alone. Like an element, a note
+     * can be nested with `addChild(groupId, noteId)`. Pass `{ alias }` in
+     * `properties` to choose its PlantUML alias.
+     */
+    public addNote(
+        id: string,
+        text: string,
+        options: NoteOptions = {},
+        properties?: { [key: string]: string | number }
+    ): this {
+        if (!this.elements) {
+            throw new Error('PlantKit must be created with create() method to use facade API');
+        }
+        if (this.elements.has(id)) {
+            throw new Error(`Duplicate element id: ${id}`);
+        }
+        if (properties && ('type' in properties || 'label' in properties)) {
+            throw new Error('Note properties cannot override type or label');
+        }
+        const attachTo = options.attachTo === undefined ? [] : ([] as string[]).concat(options.attachTo);
+        const targets = attachTo.map(targetId => {
+            const target = this.elements?.get(targetId);
+            if (!target) {
+                throw new Error(`Element not found: ${targetId}`);
+            }
+            return target;
+        });
+        const note = new Element(id, { type: NOTE_TYPE, label: text, ...properties });
+        this.register(note);
+        targets.forEach(target => this.noteLinks.push({ note, target }));
+        return this;
+    }
+
+    private register(element: Element): void {
         const alias = PlantKit.aliasOf(element);
         const owner = this.aliases.get(alias);
         if (owner !== undefined) {
             throw new Error(`Duplicate PlantUML element alias: ${alias} (already used by ${owner})`);
         }
-        this.aliases.set(alias, id);
-        this.elements.set(id, element);
-        this.graphInstance.addNode(element);
-        return this;
+        this.aliases.set(alias, element.getName());
+        this.elements!.set(element.getName(), element);
     }
 
     public addRelation(
@@ -87,6 +134,9 @@ class PlantKit {
         if (!source || !target) {
             throw new Error(`Element not found: ${!source ? fromId : toId}`);
         }
+        if (PlantKit.isNote(source) || PlantKit.isNote(target)) {
+            throw new Error(`Notes cannot be relationship endpoints: use addNote(id, text, { attachTo }) instead`);
+        }
 
         this.graphInstance.addRelation(source, target, type, label ? { label } : undefined);
         return this;
@@ -106,7 +156,7 @@ class PlantKit {
             throw new Error(`Element not found: ${!parent ? parentId : childId}`);
         }
         const parentType = parent.getProperties()['type']?.toString();
-        if (parentType && isArchimateElementType(parentType) && !canContainElements(parentType)) {
+        if (parentType === NOTE_TYPE || (parentType && isArchimateElementType(parentType) && !canContainElements(parentType))) {
             throw new Error(`Element ${parentId} of type ${parentType} cannot contain other elements`);
         }
         if (PlantKit.contains(child, parent)) {
@@ -168,7 +218,7 @@ class PlantKit {
         
         this.elements.forEach(element => {
             const type = element.getProperties()['type'];
-            if (type) {
+            if (type && type !== NOTE_TYPE) {
                 const elementType = type.toString();
                 if (!isArchimateElementType(elementType)) {
                     throw new Error(`Unknown ArchiMate element type: ${elementType}`);
@@ -226,7 +276,14 @@ class PlantKit {
 
         this.elements.forEach(element => {
             const type = element.getProperties()['type']?.toString();
-            if (!type) {
+            if (type === NOTE_TYPE) {
+                if (element.getChildren().length > 0) {
+                    diagnostics.push({
+                        code: 'ELEMENT_CANNOT_CONTAIN',
+                        message: `Note ${element.getName()} cannot contain other elements`,
+                    });
+                }
+            } else if (!type) {
                 diagnostics.push({
                     code: 'ELEMENT_TYPE_MISSING',
                     message: `Element ${element.getName()} has no ArchiMate type`,
@@ -280,9 +337,17 @@ class PlantKit {
         });
 
         body.push(this.toArchimateRelations(this.graphInstance));
+        this.noteLinks.forEach(({ note, target }) => {
+            body.push(ArchimateNoteLink(PlantKit.aliasOf(note), PlantKit.aliasOf(target)));
+        });
         this.diagramInstance.setGeneratedBody(body);
 
         return this.diagramInstance.output();
+    }
+
+    /** Whether an element is a note (its `type` property is `NOTE_TYPE`). */
+    public static isNote(element: Element): boolean {
+        return element.getProperties()['type'] === NOTE_TYPE;
     }
 
     /** Whether `target` is `root` or one of its descendants (compared by identity). */
@@ -444,33 +509,7 @@ class PlantKit {
     }
 
     public printArchimate(node: Element, indent = 0): void {
-        const children = node.getChildren();
-        const name = PlantKit.aliasOf(node);
-        const properties = node.getProperties();
-        let type = "";
-        if (Object.prototype.hasOwnProperty.call(properties, "type")) {
-            type = properties['type'].toString();
-        }
-        let label: string = "";
-        if (Object.prototype.hasOwnProperty.call(properties, "label")) {
-            label = properties['label'].toString();
-        }
-        if (type && !isArchimateElementType(type)) {
-            throw new Error(`Unknown ArchiMate element type: ${type}`);
-        }
-        if (children.length > 0 && type && !canContainElements(type as ArchimateElementType)) {
-            throw new Error(`Element ${node.getName()} of type ${type} cannot contain other elements`);
-        }
-
-        if (children.length > 0) {
-            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label, true) + ' {');
-            for (const child of node.getChildren()) {
-                this.printArchimate(child, indent + 1);
-            }
-            console.log('  '.repeat(indent) + '}');
-        } else {
-            console.log('  '.repeat(indent) + ArchimateElement(type as ArchimateElementType, name, label));
-        }
+        this.toArchimate(node, [], indent).split('\n').forEach(line => console.log(line));
     }
 
     public toArchimate(node: Element, out: string[] = [], indent = 0): string {
@@ -492,6 +531,13 @@ class PlantKit {
         let label: string = "";
         if (Object.prototype.hasOwnProperty.call(properties, "label")) {
             label = properties['label'].toString();
+        }
+        if (type === NOTE_TYPE) {
+            if (children.length > 0) {
+                throw new Error(`Note ${node.getName()} cannot contain other elements`);
+            }
+            out.push('  '.repeat(indent) + ArchimateNote(name, label));
+            return;
         }
         if (type && !isArchimateElementType(type)) {
             throw new Error(`Unknown ArchiMate element type: ${type}`);
