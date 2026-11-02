@@ -72,4 +72,16 @@ describe('ArchimateElement', () => {
     expect(canContainElements(ArchimateElement.type.Junction_Or)).toBe(false);
     expect(canContainElements(ArchimateElement.type.Junction_And)).toBe(false);
   });
+
+  it('writes an empty label as a single space (#263)', () => {
+    expect(ArchimateElement(ArchimateElement.type.Junction_And, 'J1', '')).toBe(
+      'Junction_And("J1", " ")',
+    );
+    expect(ArchimateElement(ArchimateElement.type.Grouping, 'G', '', true)).toBe(
+      'Grouping("G", " ")',
+    );
+    expect(ArchimateElement(ArchimateElement.type.Business_Actor, 'A', '', true)).toBe(
+      'Business_Actor("A", " ", 1)',
+    );
+  });
 });

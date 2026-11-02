@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 import {
+  escapePlantUmlLabel,
   escapePlantUmlLine,
   escapePlantUmlString,
   toPlantUmlDiagramName,
@@ -20,5 +21,12 @@ describe('PlantUmlString', () => {
     expect(toPlantUmlDiagramName('../etc')).toBe('etc');
     expect(toPlantUmlDiagramName('v1.2-final')).toBe('v1.2-final');
     expect(toPlantUmlDiagramName('  ')).toBe('');
+  });
+
+  it('writes an empty label as a single space, which PlantUML accepts (#263)', () => {
+    expect(escapePlantUmlLabel('')).toBe(' ');
+    expect(escapePlantUmlLabel(' ')).toBe(' ');
+    expect(escapePlantUmlLabel('\n')).toBe('\\n');
+    expect(escapePlantUmlLabel('Say "hi"')).toBe('Say <U+0022>hi<U+0022>');
   });
 });

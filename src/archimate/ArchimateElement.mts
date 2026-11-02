@@ -1,4 +1,4 @@
-import { escapePlantUmlString } from './PlantUmlString.mjs';
+import { escapePlantUmlLabel, escapePlantUmlString } from './PlantUmlString.mjs';
 
 const ElementType = {
   Strategy_Resource: 'Strategy_Resource',
@@ -106,7 +106,7 @@ function ArchimateElement(
   nest = false,
 ): string {
   const nestArgument = nest && !typesWithoutNestParameter.has(type) ? ', 1' : '';
-  return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlString(label)}"${nestArgument})`;
+  return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlLabel(label)}"${nestArgument})`;
 }
 
 ArchimateElement.type = ElementType;

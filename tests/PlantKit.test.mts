@@ -712,6 +712,39 @@ describe('Standalone output (#244)', () => {
   });
 });
 
+describe('Empty labels (#263)', () => {
+  it('writes unnamed junctions, groups, notes and elements with a single-space label', () => {
+    const output = PlantKit.create('v', 'V')
+      .addElement('j', 'Junction_And', '')
+      .addElement('g', 'Grouping', '')
+      .addElement('o', 'Business_Object', 'O')
+      .addChild('g', 'o')
+      .addNote('n', '')
+      .generate();
+
+    expect(output).toContain('Junction_And("ID_j", " ")');
+    expect(output).toContain('Grouping("ID_g", " ") {');
+    expect(output).toContain('note " " as ID_n');
+    expect(output).not.toContain('""');
+  });
+
+  it('treats an Element without a label property the same way', () => {
+    const element = new Element('x', { type: 'Business_Object' });
+
+    expect(new PlantKit().toArchimate(element)).toBe('Business_Object("ID_x", " ")');
+  });
+
+  it('leaves empty relationship labels alone, since PlantUML accepts them', () => {
+    const output = PlantKit.create('v', 'V')
+      .addElement('a', 'Business_Object', 'A')
+      .addElement('b', 'Business_Object', 'B')
+      .addRelation('a', 'b', 'Rel_Serving')
+      .generate();
+
+    expect(output).toContain('Rel_Serving("ID_a", "ID_b","")');
+  });
+});
+
 describe('Notes (#248)', () => {
   const base = () =>
     PlantKit.create('n', 'N', { sprites: false, scale: null, layout: null })
