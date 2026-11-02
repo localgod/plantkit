@@ -25,8 +25,7 @@ export class Element {
     return this.children;
   }
 
-
-   public findElement(name: string): Element | null {
+  public findElement(name: string): Element | null {
     if (this.name === name) {
       return this;
     }
@@ -46,7 +45,7 @@ export class Element {
   private removeChildRecursive(parent: Element, name: string): void {
     for (const child of parent.children) {
       if (child.name === name) {
-        parent.children = parent.children.filter(c => c !== child);
+        parent.children = parent.children.filter((c) => c !== child);
       } else {
         this.removeChildRecursive(child, name);
       }

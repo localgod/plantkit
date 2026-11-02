@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { ArchimateElement, type ArchimateElementType } from '../src/archimate/ArchimateElement.mjs';
-import { ArchimateRelation, type ArchimateRelationType } from '../src/archimate/ArchimateRelation.mjs';
+import {
+  ArchimateRelation,
+  type ArchimateRelationType,
+} from '../src/archimate/ArchimateRelation.mjs';
 import { getArchimateSprite } from '../src/archimate/ArchimateSprite.mjs';
 
 describe('ArchimateSprite', () => {
@@ -27,6 +30,8 @@ describe('ArchimateSprite', () => {
   it('uses the sprite names PlantUML ships for groupings and distribution networks', () => {
     expect(getArchimateSprite('Grouping').path).toBe('other-grouping');
     expect(getArchimateSprite('Group').path).toBe('other-grouping');
-    expect(getArchimateSprite('Physical_DistributionNetwork').path).toBe('technology-distribution-network');
+    expect(getArchimateSprite('Physical_DistributionNetwork').path).toBe(
+      'technology-distribution-network',
+    );
   });
 });

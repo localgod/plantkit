@@ -1,4 +1,3 @@
-
 import { escapePlantUmlString } from './PlantUmlString.mjs';
 
 const ElementType = {
@@ -69,7 +68,7 @@ const ElementType = {
 } as const;
 
 type ElementTypeKey = keyof typeof ElementType;
-export type ArchimateElementType = typeof ElementType[ElementTypeKey];
+export type ArchimateElementType = (typeof ElementType)[ElementTypeKey];
 
 export function isArchimateElementType(type: string): type is ArchimateElementType {
   return Object.values(ElementType).includes(type as ArchimateElementType);
@@ -100,7 +99,12 @@ export function canContainElements(type: ArchimateElementType): boolean {
  * a container instead of a special shape (actor, process, ...) that cannot
  * hold children.
  */
-function ArchimateElement(type: ArchimateElementType, alias: string, label: string, nest = false): string {
+function ArchimateElement(
+  type: ArchimateElementType,
+  alias: string,
+  label: string,
+  nest = false,
+): string {
   const nestArgument = nest && !typesWithoutNestParameter.has(type) ? ', 1' : '';
   return `${type}("${escapePlantUmlString(alias)}", "${escapePlantUmlString(label)}"${nestArgument})`;
 }

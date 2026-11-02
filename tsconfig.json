@@ -12,7 +12,7 @@
     /* Declarations */
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false, 
+    "emitDeclarationOnly": false,
 
     /* Output & Interop */
     "importHelpers": true,

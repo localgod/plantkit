@@ -16,9 +16,7 @@ export function escapePlantUmlString(value: string): string {
  * quotes are literal but `\\n` is rendered as a line break.
  */
 export function escapePlantUmlLine(value: string): string {
-  return value
-    .replace(/\\/g, '\\\\')
-    .replace(/\r?\n|\r/g, '\\n');
+  return value.replace(/\\/g, '\\\\').replace(/\r?\n|\r/g, '\\n');
 }
 
 /**
@@ -26,7 +24,5 @@ export function escapePlantUmlLine(value: string): string {
  * (PlantUML uses it as the output file name). Returns '' when nothing is left.
  */
 export function toPlantUmlDiagramName(value: string): string {
-  return value
-    .replace(/[^A-Za-z0-9_.-]+/g, '_')
-    .replace(/^[_.]+|_+$/g, '');
+  return value.replace(/[^A-Za-z0-9_.-]+/g, '_').replace(/^[_.]+|_+$/g, '');
 }

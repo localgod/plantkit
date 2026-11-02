@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 import { ArchimateRelation } from '../src/archimate/ArchimateRelation.mjs';
 
 describe('ArchimateRelation', () => {
@@ -10,6 +10,8 @@ describe('ArchimateRelation', () => {
       'Data "flow"\nnext',
     );
 
-    expect(result).toBe('Rel_Flow("source_<U+0022>id", "target_\\\\id","Data <U+0022>flow<U+0022>\\nnext")');
+    expect(result).toBe(
+      'Rel_Flow("source_<U+0022>id", "target_\\\\id","Data <U+0022>flow<U+0022>\\nnext")',
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { Element } from "./Element.mjs";
+import { Element } from './Element.mjs';
 type NodeRelation = {
   source: Element;
   target: Element;
@@ -19,9 +19,14 @@ export class ElementGraph {
     this.nodes.add(node);
   }
 
-  public addRelation(source: Element, target: Element, type: string, properties?: { [key: string]: string | number }): void {
+  public addRelation(
+    source: Element,
+    target: Element,
+    type: string,
+    properties?: { [key: string]: string | number },
+  ): void {
     if (!this.nodes.has(source) || !this.nodes.has(target)) {
-      throw new Error("Both nodes must be part of the graph before adding a relation.");
+      throw new Error('Both nodes must be part of the graph before adding a relation.');
     }
     this.relations.add({ source, target, type, properties });
   }
@@ -35,18 +40,16 @@ export class ElementGraph {
   }
 
   public getOutgoingRelations(node: Element): NodeRelation[] {
-    return Array.from(this.relations).filter(rel => rel.source === node);
+    return Array.from(this.relations).filter((rel) => rel.source === node);
   }
 
   public getIncomingRelations(node: Element): NodeRelation[] {
-    return Array.from(this.relations).filter(rel => rel.target === node);
+    return Array.from(this.relations).filter((rel) => rel.target === node);
   }
 
   public getConnectedNodes(node: Element): Element[] {
-    const outgoing = this.getOutgoingRelations(node).map(rel => rel.target);
-    const incoming = this.getIncomingRelations(node).map(rel => rel.source);
+    const outgoing = this.getOutgoingRelations(node).map((rel) => rel.target);
+    const incoming = this.getIncomingRelations(node).map((rel) => rel.source);
     return [...new Set([...outgoing, ...incoming])];
   }
-
-  
 }
