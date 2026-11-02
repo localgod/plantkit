@@ -12,6 +12,16 @@ export function escapePlantUmlString(value: string): string {
 }
 
 /**
+ * Escapes an element label or note text. PlantUML rejects an empty quoted
+ * label in every Archimate-PlantUML element procedure and in `note`, so an
+ * empty value becomes a single space, which renders and draws nothing.
+ * Junctions, unnamed groups and empty notes are common in real models.
+ */
+export function escapePlantUmlLabel(value: string): string {
+  return escapePlantUmlString(value) || ' ';
+}
+
+/**
  * Escapes text for single-line PlantUML commands such as `title`, where
  * quotes are literal but `\\n` is rendered as a line break.
  */

@@ -126,4 +126,28 @@ describe.runIf(plantUmlAvailable)('Rendering generated output with PlantUML', ()
     expect(text).toContain('Stand-alone');
     expect(text).toContain('Inside the group');
   });
+
+  it('renders unnamed elements, junctions, groups and notes (#263)', () => {
+    renderPlantUml(
+      PlantKit.create('empty', 'Empty labels')
+        .addElement('component', 'Application_Component', '')
+        .addElement('and', 'Junction_And', '')
+        .addElement('or', 'Junction_Or', '')
+        .addElement('grouping', 'Grouping', '')
+        .addElement('group', 'Group', '')
+        .addElement('actor', 'Business_Actor', '')
+        .addElement('inner1', 'Business_Object', 'Inside grouping')
+        .addElement('inner2', 'Business_Object', 'Inside group')
+        .addElement('inner3', 'Business_Role', 'Inside actor')
+        .addChild('grouping', 'inner1')
+        .addChild('group', 'inner2')
+        .addChild('actor', 'inner3')
+        .addNote('note', '', { attachTo: 'component' })
+        .addNote('nested-note', '')
+        .addChild('grouping', 'nested-note')
+        .addRelation('component', 'and', 'Rel_Flow')
+        .addRelation('and', 'or', 'Rel_Flow')
+        .generate(),
+    );
+  });
 });
